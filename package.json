@@ -1,0 +1,38 @@
+{
+  "name": "adam-lis-api",
+  "version": "1.0.0",
+  "description": "Adam LIS API Server - Hospital Information System Integration",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "node tests/test-all.js",
+    "test-bridging": "node tests/bridging/test-patient-registration.js",
+    "test-lab-results-pk": "node tests/bridging/test-lab-results-pk.js"
+  },
+  "keywords": [
+    "api",
+    "lis",
+    "hospital",
+    "bridging",
+    "patient",
+    "registration"
+  ],
+  "author": "Adamlis Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.0",
+    "winston": "^3.18.3",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
