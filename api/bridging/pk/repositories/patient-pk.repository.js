@@ -180,6 +180,28 @@ async function getPemeriksaanByTindakan(conn, kd_jenis_prw) {
 }
 
 /**
+ * Get selected pemeriksaan (template) for noorder
+ * Only returns template_laboratorium that are actually selected/requested
+ * @param {Object} conn - Database connection
+ * @param {string} noorder - Order number
+ * @returns {Promise<Array>} Selected pemeriksaan list
+ */
+async function getSelectedPemeriksaan(conn, noorder) {
+    const query = `
+        SELECT DISTINCT
+            tl.id_template as kode_pemeriksaan,
+            tl.Pemeriksaan as nama_pemeriksaan
+        FROM permintaan_detail_permintaan_lab pdpl
+        INNER JOIN template_laboratorium tl ON pdpl.id_template = tl.id_template
+        WHERE pdpl.noorder = ?
+        ORDER BY tl.urut, tl.id_template
+    `;
+    
+    const [results] = await conn.execute(query, [noorder]);
+    return results;
+}
+
+/**
  * Get diagnosa for patient
  * @param {Object} conn - Database connection
  * @param {string} no_rawat - No rawat
@@ -204,6 +226,7 @@ module.exports = {
     searchPatientByNoorder,
     getRequestedTindakan,
     getPemeriksaanByTindakan,
+    getSelectedPemeriksaan,
     getDiagnosa
 };
 
