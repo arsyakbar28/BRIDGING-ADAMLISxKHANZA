@@ -10,11 +10,11 @@ require('dotenv').config();
 
 // Database configuration with connection pool settings
 const dbConfig = {
-    host: process.env.DB_HOST || '192.168.75.200',
-    port: process.env.DB_PORT || 3306,
-    database: process.env.DB_NAME || 'adhyaksa_db',
-    user: process.env.DB_USER || 'adhyaksa',
-    password: process.env.DB_PASSWORD || 'Adhyaksa123@',
+    host: process.env.DB_HOST ,
+    port: process.env.DB_PORT ,
+    database: process.env.DB_NAME ,
+    user: process.env.DB_USER ,
+    password: process.env.DB_PASSWORD ,
     // Connection pool settings
     waitForConnections: true,
     connectionLimit: 10, // Max 10 concurrent connections

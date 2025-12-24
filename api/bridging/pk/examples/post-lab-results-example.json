@@ -1,0 +1,31 @@
+{
+  "noorder": "PK202511010004",
+  "dokter_pj": "D029",
+  "petugas": "LAB007",
+  "dokter_perujuk": "D018",
+  "tgl_periksa": "2025-11-01",
+  "jam_periksa": "16:00:38",
+  "pemeriksaan": [
+    {
+      "kode_pemeriksaan": "1001",
+      "hasil": "120",
+      "nilai_rujukan": "70-100",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "1002",
+      "hasil": "5.5",
+      "nilai_rujukan": "3.5-5.5",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "1003",
+      "hasil": "Negatif",
+      "nilai_rujukan": "-",
+      "keterangan": "Tidak ditemukan"
+    }
+  ],
+  "kesan": "Hasil pemeriksaan dalam batas normal",
+  "saran": "Lanjutkan pengobatan sesuai anjuran dokter"
+}
+
