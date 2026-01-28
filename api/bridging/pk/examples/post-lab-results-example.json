@@ -1,31 +1,42 @@
 {
-  "noorder": "PK202511010004",
+  "noorder": "PK202512220119",
   "dokter_pj": "D029",
   "petugas": "LAB007",
-  "dokter_perujuk": "D018",
-  "tgl_periksa": "2025-11-01",
-  "jam_periksa": "16:00:38",
+  "dokter_perujuk": "D0000090",
+  "tgl_periksa": "2025-12-22",
+  "jam_periksa": "21:57:08",
   "pemeriksaan": [
     {
-      "kode_pemeriksaan": "1001",
+      "kode_pemeriksaan": "GDS",
       "hasil": "120",
-      "nilai_rujukan": "70-100",
+      "nilai_rujukan": "< 140",
       "keterangan": "Normal"
     },
     {
-      "kode_pemeriksaan": "1002",
-      "hasil": "5.5",
-      "nilai_rujukan": "3.5-5.5",
+      "kode_pemeriksaan": "GDP",
+      "hasil": "85",
+      "nilai_rujukan": "70 - 110",
       "keterangan": "Normal"
     },
     {
-      "kode_pemeriksaan": "1003",
-      "hasil": "Negatif",
+      "kode_pemeriksaan": "GD2JPP",
+      "hasil": "130",
+      "nilai_rujukan": "< 140",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GLUSTICK",
+      "hasil": "95",
       "nilai_rujukan": "-",
-      "keterangan": "Tidak ditemukan"
+      "keterangan": "-"
+    },
+    {
+      "kode_pemeriksaan": "HBA1C",
+      "hasil": "5.8",
+      "nilai_rujukan": "< 6.5",
+      "keterangan": "Normal"
     }
   ],
-  "kesan": "Hasil pemeriksaan dalam batas normal",
-  "saran": "Lanjutkan pengobatan sesuai anjuran dokter"
+  "kesan": "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+  "saran": "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
 }
-

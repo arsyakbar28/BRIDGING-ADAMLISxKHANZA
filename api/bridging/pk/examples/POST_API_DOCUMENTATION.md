@@ -26,12 +26,12 @@ Content-Type: application/json
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `noorder` | string | Nomor order lab | `"PK202511010004"` |
+| `noorder` | string | Nomor order lab | `"PK202512220119"` |
 | `dokter_pj` | string | Kode dokter penanggung jawab | `"D029"` |
 | `petugas` | string | Kode petugas/NIP | `"LAB007"` |
-| `dokter_perujuk` | string | Kode dokter perujuk | `"D018"` |
-| `tgl_periksa` | string | Tanggal pemeriksaan (YYYY-MM-DD) | `"2025-11-01"` |
-| `jam_periksa` | string | Jam pemeriksaan (HH:mm:ss) | `"16:00:38"` |
+| `dokter_perujuk` | string | Kode dokter perujuk | `"D0000090"` |
+| `tgl_periksa` | string | Tanggal pemeriksaan (YYYY-MM-DD) | `"2025-12-22"` |
+| `jam_periksa` | string | Jam pemeriksaan (HH:mm:ss) | `"21:57:08"` |
 | `pemeriksaan` | array | Array pemeriksaan (min 1 item) | See below |
 
 ### Optional Fields
@@ -61,28 +61,46 @@ curl -X POST http://localhost:5000/adam-lis/bridging/ \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "noorder": "PK202511010004",
+    "noorder": "PK202512220119",
     "dokter_pj": "D029",
     "petugas": "LAB007",
-    "dokter_perujuk": "D018",
-    "tgl_periksa": "2025-11-01",
-    "jam_periksa": "16:00:38",
+    "dokter_perujuk": "D0000090",
+    "tgl_periksa": "2025-12-22",
+    "jam_periksa": "21:57:08",
     "pemeriksaan": [
       {
-        "kode_pemeriksaan": "1001",
+        "kode_pemeriksaan": "GDS",
         "hasil": "120",
-        "nilai_rujukan": "70-100",
+        "nilai_rujukan": "< 140",
         "keterangan": "Normal"
       },
       {
-        "kode_pemeriksaan": "1002",
-        "hasil": "5.5",
-        "nilai_rujukan": "3.5-5.5",
+        "kode_pemeriksaan": "GDP",
+        "hasil": "85",
+        "nilai_rujukan": "70 - 110",
+        "keterangan": "Normal"
+      },
+      {
+        "kode_pemeriksaan": "GD2JPP",
+        "hasil": "130",
+        "nilai_rujukan": "< 140",
+        "keterangan": "Normal"
+      },
+      {
+        "kode_pemeriksaan": "GLUSTICK",
+        "hasil": "95",
+        "nilai_rujukan": "-",
+        "keterangan": "-"
+      },
+      {
+        "kode_pemeriksaan": "HBA1C",
+        "hasil": "5.8",
+        "nilai_rujukan": "< 6.5",
         "keterangan": "Normal"
       }
     ],
-    "kesan": "Hasil pemeriksaan dalam batas normal",
-    "saran": "Lanjutkan pengobatan sesuai anjuran dokter"
+    "kesan": "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+    "saran": "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
   }'
 ```
 
@@ -96,28 +114,46 @@ const response = await fetch('http://localhost:5000/adam-lis/bridging/', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    noorder: "PK202511010004",
+    noorder: "PK202512220119",
     dokter_pj: "D029",
     petugas: "LAB007",
-    dokter_perujuk: "D018",
-    tgl_periksa: "2025-11-01",
-    jam_periksa: "16:00:38",
+    dokter_perujuk: "D0000090",
+    tgl_periksa: "2025-12-22",
+    jam_periksa: "21:57:08",
     pemeriksaan: [
       {
-        kode_pemeriksaan: "1001",
+        kode_pemeriksaan: "GDS",
         hasil: "120",
-        nilai_rujukan: "70-100",
+        nilai_rujukan: "< 140",
         keterangan: "Normal"
       },
       {
-        kode_pemeriksaan: "1002",
-        hasil: "5.5",
-        nilai_rujukan: "3.5-5.5",
+        kode_pemeriksaan: "GDP",
+        hasil: "85",
+        nilai_rujukan: "70 - 110",
+        keterangan: "Normal"
+      },
+      {
+        kode_pemeriksaan: "GD2JPP",
+        hasil: "130",
+        nilai_rujukan: "< 140",
+        keterangan: "Normal"
+      },
+      {
+        kode_pemeriksaan: "GLUSTICK",
+        hasil: "95",
+        nilai_rujukan: "-",
+        keterangan: "-"
+      },
+      {
+        kode_pemeriksaan: "HBA1C",
+        hasil: "5.8",
+        nilai_rujukan: "< 6.5",
         keterangan: "Normal"
       }
     ],
-    kesan: "Hasil pemeriksaan dalam batas normal",
-    saran: "Lanjutkan pengobatan sesuai anjuran dokter"
+    kesan: "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+    saran: "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
   })
 });
 
@@ -141,16 +177,110 @@ console.log(data);
 ```json
 {
   "success": true,
-  "message": "Lab results posted successfully for noorder: PK202511010004",
+  "message": "Lab results posted successfully for noorder: PK202512220119",
+  "summary": {
+    "noorder": "PK202512220119",
+    "no_rawat": "2025/12/22/000123",
+    "total_tindakan": 1,
+    "total_pemeriksaan": 5,
+    "tgl_periksa": "2025-12-22",
+    "jam_periksa": "21:57:08"
+  },
+  "biaya_periksa": {
+    "total": 150000,
+    "mata_uang": "IDR",
+    "formatted": "Rp 150.000",
+    "breakdown": [
+      {
+        "kode_tindakan": "L000016",
+        "nama_tindakan": "Panel Glukosa",
+        "biaya": 150000,
+        "detail": {
+          "total": 150000,
+          "bagian_rs": 75000,
+          "bhp": 15000,
+          "tarif_perujuk": 30000,
+          "tarif_tindakan_dokter": 15000,
+          "tarif_tindakan_petugas": 10000,
+          "kso": 3000,
+          "menejemen": 2000
+        }
+      }
+    ]
+  },
+  "saran_kesan": {
+    "kesan": "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+    "saran": "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
+  },
   "payload": [
     {
-      "noorder": "PK202511010004",
-      "no_rawat": "2025/11/01/0001",
-      "tgl_periksa": "2025-11-01",
-      "jam_periksa": "16:00:38",
-      "inserted_periksa": 2,
-      "inserted_detail": 2,
-      "status": "updated"
+      "no_urut": 1,
+      "kode_jenis_perawatan": "L000016",
+      "nama_perawatan": "Panel Glukosa",
+      "dokter_pj": "D029",
+      "petugas": "LAB007",
+      "dokter_perujuk": "D0000090",
+      "tgl_periksa": "2025-12-22",
+      "jam_periksa": "21:57:08",
+      "no_rawat": "2025/12/22/000123",
+      "biaya_tindakan": 150000,
+      "breakdown_biaya": {
+        "total": 150000,
+        "bagian_rs": 75000,
+        "bhp": 15000,
+        "tarif_perujuk": 30000,
+        "tarif_tindakan_dokter": 15000,
+        "tarif_tindakan_petugas": 10000,
+        "kso": 3000,
+        "menejemen": 2000
+      },
+      "detail_pemeriksaan": [
+        {
+          "kode_pemeriksaan": "GDS",
+          "nama_pemeriksaan": "Glukosa Sewaktu",
+          "hasil": "120",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "< 140",
+          "keterangan": "Normal",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "GDP",
+          "nama_pemeriksaan": "Glukosa Puasa",
+          "hasil": "85",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "70 - 110",
+          "keterangan": "Normal",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "GD2JPP",
+          "nama_pemeriksaan": "Glukosa 2 Jam PP",
+          "hasil": "130",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "< 140",
+          "keterangan": "Normal",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "GLUSTICK",
+          "nama_pemeriksaan": "Glukosa Stick",
+          "hasil": "95",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "-",
+          "keterangan": "-",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "HBA1C",
+          "nama_pemeriksaan": "HbA1C",
+          "hasil": "5.8",
+          "satuan": "%",
+          "nilai_rujukan": "< 6.5",
+          "keterangan": "Normal",
+          "status": "Normal"
+        }
+      ]
     }
   ]
 }
@@ -193,7 +323,7 @@ console.log(data);
 ```json
 {
   "success": false,
-  "message": "No lab request found for noorder: PK202511010004",
+  "message": "No lab request found for noorder: PK202512220119",
   "payload": []
 }
 ```

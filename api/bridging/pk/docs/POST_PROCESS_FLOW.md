@@ -35,15 +35,46 @@ HTTP Response
 **Request Body:**
 ```json
 {
-  "noorder": "PK202511010004",
+  "noorder": "PK202512220119",
   "dokter_pj": "D029",
   "petugas": "LAB007",
-  "dokter_perujuk": "D018",
-  "tgl_periksa": "2025-11-01",
-  "jam_periksa": "16:00:38",
-  "pemeriksaan": [...],
-  "kesan": "...",
-  "saran": "..."
+  "dokter_perujuk": "D0000090",
+  "tgl_periksa": "2025-12-22",
+  "jam_periksa": "21:57:08",
+  "pemeriksaan": [
+    {
+      "kode_pemeriksaan": "GDS",
+      "hasil": "120",
+      "nilai_rujukan": "< 140",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GDP",
+      "hasil": "85",
+      "nilai_rujukan": "70 - 110",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GD2JPP",
+      "hasil": "130",
+      "nilai_rujukan": "< 140",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GLUSTICK",
+      "hasil": "95",
+      "nilai_rujukan": "-",
+      "keterangan": "-"
+    },
+    {
+      "kode_pemeriksaan": "HBA1C",
+      "hasil": "5.8",
+      "nilai_rujukan": "< 6.5",
+      "keterangan": "Normal"
+    }
+  ],
+  "kesan": "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+  "saran": "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
 }
 ```
 
@@ -456,6 +487,237 @@ Response JSON
 5. **Data Integrity:** Delete old data sebelum insert baru (prevent duplication)
 6. **Auto Grouping:** Pemeriksaan otomatis di-group berdasarkan tindakan
 7. **Comprehensive Response:** Response berisi summary, biaya breakdown, dan detail
+
+---
+
+## 📝 Complete Request/Response Example
+
+### **Request Example**
+
+**Endpoint:** `POST /adam-lis/bridging/`
+
+**Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "noorder": "PK202512220119",
+  "dokter_pj": "D029",
+  "petugas": "LAB007",
+  "dokter_perujuk": "D0000090",
+  "tgl_periksa": "2025-12-22",
+  "jam_periksa": "21:57:08",
+  "pemeriksaan": [
+    {
+      "kode_pemeriksaan": "GDS",
+      "hasil": "120",
+      "nilai_rujukan": "< 140",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GDP",
+      "hasil": "85",
+      "nilai_rujukan": "70 - 110",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GD2JPP",
+      "hasil": "130",
+      "nilai_rujukan": "< 140",
+      "keterangan": "Normal"
+    },
+    {
+      "kode_pemeriksaan": "GLUSTICK",
+      "hasil": "95",
+      "nilai_rujukan": "-",
+      "keterangan": "-"
+    },
+    {
+      "kode_pemeriksaan": "HBA1C",
+      "hasil": "5.8",
+      "nilai_rujukan": "< 6.5",
+      "keterangan": "Normal"
+    }
+  ],
+  "kesan": "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+  "saran": "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
+}
+```
+
+### **Response Example (Success)**
+
+**Status:** `200 OK`
+
+**Body:**
+```json
+{
+  "success": true,
+  "message": "Lab results posted successfully for noorder: PK202512220119",
+  "summary": {
+    "noorder": "PK202512220119",
+    "no_rawat": "2025/12/22/000123",
+    "total_tindakan": 1,
+    "total_pemeriksaan": 5,
+    "tgl_periksa": "2025-12-22",
+    "jam_periksa": "21:57:08"
+  },
+  "biaya_periksa": {
+    "total": 150000,
+    "mata_uang": "IDR",
+    "formatted": "Rp 150.000",
+    "breakdown": [
+      {
+        "kode_tindakan": "L000016",
+        "nama_tindakan": "Panel Glukosa",
+        "biaya": 150000,
+        "detail": {
+          "total": 150000,
+          "bagian_rs": 75000,
+          "bhp": 15000,
+          "tarif_perujuk": 30000,
+          "tarif_tindakan_dokter": 15000,
+          "tarif_tindakan_petugas": 10000,
+          "kso": 3000,
+          "menejemen": 2000
+        }
+      }
+    ]
+  },
+  "saran_kesan": {
+    "kesan": "Hasil pemeriksaan panel glukosa menunjukkan kadar gula darah dalam batas normal. HbA1C menunjukkan kontrol gula darah jangka panjang yang baik.",
+    "saran": "Lanjutkan pola hidup sehat dengan diet seimbang dan olahraga teratur. Kontrol rutin setiap 3 bulan untuk pemantauan HbA1C."
+  },
+  "payload": [
+    {
+      "no_urut": 1,
+      "kode_jenis_perawatan": "L000016",
+      "nama_perawatan": "Panel Glukosa",
+      "dokter_pj": "D029",
+      "petugas": "LAB007",
+      "dokter_perujuk": "D0000090",
+      "tgl_periksa": "2025-12-22",
+      "jam_periksa": "21:57:08",
+      "no_rawat": "2025/12/22/000123",
+      "biaya_tindakan": 150000,
+      "breakdown_biaya": {
+        "total": 150000,
+        "bagian_rs": 75000,
+        "bhp": 15000,
+        "tarif_perujuk": 30000,
+        "tarif_tindakan_dokter": 15000,
+        "tarif_tindakan_petugas": 10000,
+        "kso": 3000,
+        "menejemen": 2000
+      },
+      "detail_pemeriksaan": [
+        {
+          "kode_pemeriksaan": "GDS",
+          "nama_pemeriksaan": "Glukosa Sewaktu",
+          "hasil": "120",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "< 140",
+          "keterangan": "Normal",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "GDP",
+          "nama_pemeriksaan": "Glukosa Puasa",
+          "hasil": "85",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "70 - 110",
+          "keterangan": "Normal",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "GD2JPP",
+          "nama_pemeriksaan": "Glukosa 2 Jam PP",
+          "hasil": "130",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "< 140",
+          "keterangan": "Normal",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "GLUSTICK",
+          "nama_pemeriksaan": "Glukosa Stick",
+          "hasil": "95",
+          "satuan": "mg/dL",
+          "nilai_rujukan": "-",
+          "keterangan": "-",
+          "status": "Normal"
+        },
+        {
+          "kode_pemeriksaan": "HBA1C",
+          "nama_pemeriksaan": "HbA1C",
+          "hasil": "5.8",
+          "satuan": "%",
+          "nilai_rujukan": "< 6.5",
+          "keterangan": "Normal",
+          "status": "Normal"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### **Response Example (Error - Validation)**
+
+**Status:** `400 Bad Request`
+
+**Body:**
+```json
+{
+  "success": false,
+  "message": "Validation failed: Found 3 error(s)",
+  "errors": [
+    {
+      "field": "tgl_periksa",
+      "message": "Format tanggal tidak valid. Gunakan format: YYYY-MM-DD",
+      "value": "22-12-2025"
+    },
+    {
+      "field": "pemeriksaan[0].kode_pemeriksaan",
+      "message": "Kode pemeriksaan tidak boleh kosong"
+    },
+    {
+      "field": "dokter_pj",
+      "message": "Kode dokter tidak boleh kosong"
+    }
+  ],
+  "payload": []
+}
+```
+
+### **Response Example (Error - Not Found)**
+
+**Status:** `404 Not Found`
+
+**Body:**
+```json
+{
+  "success": false,
+  "message": "No lab request found for noorder: PK202512220119",
+  "payload": []
+}
+```
+
+### **Response Example (Error - Database)**
+
+**Status:** `500 Internal Server Error`
+
+**Body:**
+```json
+{
+  "success": false,
+  "message": "Kode dokter tidak valid: \"D999\". Pastikan kode dokter terdaftar di sistem.",
+  "payload": []
+}
+```
 
 ---
 
