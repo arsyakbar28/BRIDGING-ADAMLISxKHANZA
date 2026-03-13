@@ -59,6 +59,14 @@ Pastikan **noorder** (mis. PK202603100031) sudah ada di tabel `permintaan_lab`. 
 
 Pastikan `dokter_pj` dan `petugas` (NIP) ada di tabel `dokter` dan `petugas` di database SIMRS. Jika tidak, akan muncul pesan error yang menyebut kode dokter atau petugas tidak valid.
 
+### 6. Error: "Incorrect string value ... for column ... nilai_rujukan"
+
+Penyebab: Kolom `nilai_rujukan` (atau charset koneksi/table) tidak mendukung karakter **Unicode** seperti **≤** (less-than-or-equal) atau **≥**. Nilai `"≤ 4"` dari LIS memakai karakter tersebut sehingga MySQL/MariaDB menolak insert.
+
+**Solusi (sudah ada di kode):** Aplikasi akan **menormalisasi** string sebelum insert: `≤` → `<=`, `≥` → `>=`, dll. Pastikan deploy versi terbaru yang memakai `db-string.helper` dan pemanggilan `normalizeStringForDb` untuk `nilai_rujukan`, `hasil`, dan `keterangan`.
+
+**Alternatif (di DB):** Ubah charset kolom/table ke `utf8mb4` dan pastikan koneksi MySQL memakai `charset: 'utf8mb4'` agar simbol Unicode bisa disimpan asli.
+
 ---
 
 ## Contoh payload minimal yang valid

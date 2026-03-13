@@ -49,6 +49,14 @@ function parseDatabaseError(error, context = {}) {
     if (errorMessage.includes('Data too long')) {
         return 'Data terlalu panjang untuk salah satu field. Periksa panjang karakter input.';
     }
+
+    // Incorrect string value (charset / Unicode, e.g. ≤ ≥ di nilai_rujukan)
+    if (errorMessage.includes('Incorrect string value') && errorMessage.includes('nilai_rujukan')) {
+        return 'Nilai rujukan mengandung karakter yang tidak didukung (mis. ≤, ≥). Gunakan <= atau >=. Jika sudah deploy perbaikan terbaru, nilai akan dinormalisasi otomatis.';
+    }
+    if (errorMessage.includes('Incorrect string value')) {
+        return 'Data mengandung karakter yang tidak didukung oleh database. Hindari simbol khusus (≤, ≥, ±) atau perbarui charset kolom ke utf8mb4.';
+    }
     
     // Connection errors
     if (errorMessage.includes('connect') || errorMessage.includes('connection')) {

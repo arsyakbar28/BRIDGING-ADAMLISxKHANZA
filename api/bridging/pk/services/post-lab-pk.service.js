@@ -8,6 +8,7 @@ const postLabRepository = require('../repositories/post-lab-pk.repository');
 const labValidator = require('../validators/lab-results-pk.validator');
 const errorParser = require('../../shared/helpers/error-parser.helper');
 const statusMapper = require('../../shared/helpers/status-mapper.helper');
+const { normalizeStringForDb } = require('../../shared/helpers/db-string.helper');
 const { logPostError, logPostSuccess } = require('../../../../utils/logger');
 
 /**
@@ -183,14 +184,14 @@ async function postLabResults(noorder, labData) {
 
             const hasilStr = normalizeHasil(p.hasil);
             const nilaiRujukanStr = normalizeNilaiRujukan(p, template);
-            
+            // Normalisasi untuk DB: ganti simbol Unicode (≤, ≥, dll) ke ASCII agar tidak error charset
             tindakanMap[kode_tindakan].pemeriksaan.push({
                 kode_pemeriksaan: template.id_template,
                 nama_pemeriksaan: template.nama_pemeriksaan,
-                hasil: hasilStr,
+                hasil: normalizeStringForDb(hasilStr),
                 satuan: template.satuan || "-",
-                nilai_rujukan: nilaiRujukanStr,
-                keterangan: (p.keterangan != null && p.keterangan !== '') ? String(p.keterangan).trim() : ""
+                nilai_rujukan: normalizeStringForDb(nilaiRujukanStr),
+                keterangan: normalizeStringForDb((p.keterangan != null && p.keterangan !== '') ? String(p.keterangan).trim() : "")
             });
         });
 
