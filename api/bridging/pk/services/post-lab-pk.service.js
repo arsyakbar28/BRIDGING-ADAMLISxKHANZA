@@ -80,8 +80,17 @@ async function postLabResults(noorder, labData) {
         const petugasNip = petugas;
         const dokterCode = dokter_pj;
         
-        // Bulk get template data
-        const kodePemeriksaanArray = pemeriksaan.map(p => p.kode_pemeriksaan);
+        // Kode untuk lookup: prioritaskan id_template numerik (dari keterangan atau kode_pemeriksaan)
+        const resolveIdTemplate = (p) => {
+            const k = p.kode_pemeriksaan;
+            const ket = p.keterangan;
+            const numKet = ket != null && String(ket).trim() !== '' && !isNaN(Number(ket)) ? Number(ket) : null;
+            if (numKet != null) return numKet;
+            if (typeof k === 'number' && !isNaN(k)) return k;
+            if (typeof k === 'string' && k.trim() !== '' && !isNaN(Number(k))) return Number(k);
+            return k;
+        };
+        const kodePemeriksaanArray = pemeriksaan.map(resolveIdTemplate).filter(v => v !== undefined && v !== null && v !== '');
         const templateDataArray = await postLabRepository.bulkGetTemplateData(conn, kodePemeriksaanArray);
 
         if (templateDataArray.length === 0) {
@@ -103,17 +112,23 @@ async function postLabResults(noorder, labData) {
             };
         }
 
-        // Map template data
+        // Map template data (dukung lookup by number atau string, sesuai id_template di DB)
         const templateMap = {};
         templateDataArray.forEach(template => {
-            templateMap[template.id_template] = template;
+            const id = template.id_template;
+            templateMap[id] = template;
+            templateMap[String(id)] = template;
         });
 
-        // Validate all templates exist
+        // Helper: ambil template (kode_pemeriksaan bisa number atau string dari client)
+        const getTemplate = (kode) => templateMap[kode] ?? templateMap[Number(kode)];
+
+        // Validate all templates exist (pakai id yang sudah di-resolve)
         const missingTemplates = [];
         pemeriksaan.forEach(p => {
-            if (!templateMap[p.kode_pemeriksaan]) {
-                missingTemplates.push(p.kode_pemeriksaan);
+            const resolvedId = resolveIdTemplate(p);
+            if (!getTemplate(resolvedId)) {
+                missingTemplates.push(p.kode_pemeriksaan ?? resolvedId);
             }
         });
 
@@ -139,8 +154,24 @@ async function postLabResults(noorder, labData) {
         // Auto-generate kode_tindakan and grouping
         const tindakanMap = {};
 
+        // Normalisasi hasil: bisa string atau objek Adam LIS { nilai_hasil, satuan, nilai_rujukan, ... }
+        const normalizeHasil = (hasil) => {
+            if (hasil === null || hasil === undefined) return '';
+            if (typeof hasil === 'string' || typeof hasil === 'number') return String(hasil).trim();
+            if (typeof hasil === 'object' && hasil !== null && 'nilai_hasil' in hasil) return String(hasil.nilai_hasil ?? '').trim();
+            return String(hasil);
+        };
+
+        const normalizeNilaiRujukan = (p, template) => {
+            if (p.nilai_rujukan !== null && p.nilai_rujukan !== undefined && p.nilai_rujukan.toString().trim() !== '') return p.nilai_rujukan.toString().trim();
+            if (typeof p.hasil === 'object' && p.hasil !== null && p.hasil.nilai_rujukan != null) return String(p.hasil.nilai_rujukan).trim();
+            return '';
+        };
+
         pemeriksaan.forEach(p => {
-            const template = templateMap[p.kode_pemeriksaan];
+            const resolvedId = resolveIdTemplate(p);
+            const template = getTemplate(resolvedId);
+            if (!template) return;
             const kode_tindakan = template.kd_jenis_prw;
             
             if (!tindakanMap[kode_tindakan]) {
@@ -149,16 +180,17 @@ async function postLabResults(noorder, labData) {
                     pemeriksaan: []
                 };
             }
+
+            const hasilStr = normalizeHasil(p.hasil);
+            const nilaiRujukanStr = normalizeNilaiRujukan(p, template);
             
             tindakanMap[kode_tindakan].pemeriksaan.push({
-                kode_pemeriksaan: p.kode_pemeriksaan,
+                kode_pemeriksaan: template.id_template,
                 nama_pemeriksaan: template.nama_pemeriksaan,
-                hasil: p.hasil,
+                hasil: hasilStr,
                 satuan: template.satuan || "-",
-                nilai_rujukan: (p.nilai_rujukan === null || p.nilai_rujukan === undefined) 
-                    ? "" 
-                    : p.nilai_rujukan.toString().trim(),
-                keterangan: p.keterangan || ""
+                nilai_rujukan: nilaiRujukanStr,
+                keterangan: (p.keterangan != null && p.keterangan !== '') ? String(p.keterangan).trim() : ""
             });
         });
 

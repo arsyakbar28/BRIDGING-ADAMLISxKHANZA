@@ -79,11 +79,14 @@ function validateLabData(labData) {
             });
         }
         
-        // Validate hasil
-        if (item.hasil === null || item.hasil === undefined || item.hasil.toString().trim() === '') {
+        // Validate hasil (bisa string atau objek Adam LIS { nilai_hasil, ... })
+        const hasilValue = item.hasil != null && typeof item.hasil === 'object' && 'nilai_hasil' in item.hasil
+            ? item.hasil.nilai_hasil
+            : item.hasil;
+        if (hasilValue === null || hasilValue === undefined || String(hasilValue).trim() === '') {
             errors.push({ 
                 field: `${prefix}.hasil`, 
-                message: 'hasil is required and cannot be empty',
+                message: 'hasil is required and cannot be empty (or provide hasil.nilai_hasil for object format)',
                 index: index
             });
         }

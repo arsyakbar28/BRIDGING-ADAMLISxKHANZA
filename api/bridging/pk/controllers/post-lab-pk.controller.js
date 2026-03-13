@@ -14,11 +14,22 @@ const { logPostError } = require('../../../../utils/logger');
 async function postLabResults(req, res) {
     try {
         const labData = req.body;
-        const { noorder } = labData;
+        const noorder = labData.noorder || labData.no_registrasi;
+        if (noorder && !labData.noorder) labData.noorder = noorder;
+        if (!labData.dokter_pj && labData.dokter_pengirim?.kode) labData.dokter_pj = labData.dokter_pengirim.kode;
+        if (!labData.dokter_perujuk && labData.dokter_pengirim?.kode) labData.dokter_perujuk = labData.dokter_pengirim.kode;
+        if (!labData.petugas && labData.kode_pegawai) labData.petugas = labData.kode_pegawai;
+        if (!labData.tgl_periksa && labData.waktu_selesai) {
+            const s = String(labData.waktu_selesai).trim();
+            if (s.length >= 10) {
+                labData.tgl_periksa = s.slice(0, 10);
+                labData.jam_periksa = s.length >= 19 ? s.slice(11, 19) : (labData.jam_periksa || '00:00:00');
+            }
+        }
 
         // Validate input (basic check)
         if (!noorder || !labData.pemeriksaan || !Array.isArray(labData.pemeriksaan) || labData.pemeriksaan.length === 0 ||
-            !labData.dokter_pj || !labData.petugas || !labData.dokter_perujuk || 
+            !labData.dokter_pj || !labData.petugas || !labData.dokter_perujuk ||
             !labData.tgl_periksa || !labData.jam_periksa) {
             
             // Log validation error
