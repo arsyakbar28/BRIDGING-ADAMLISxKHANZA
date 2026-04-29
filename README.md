@@ -5,15 +5,9 @@
 - Node.js minimal versi 14.
 - MySQL atau MariaDB.
 - Database Khanza/SIMRS dengan nama `sik`.
-- File dump database, contoh `sik.sql`.
 
 ## Instalasi
 
-Masuk ke folder project:
-
-```bash
-cd D:\project\BRIDGING-ADAMLISxKHANZA
-```
 
 Install dependency:
 
@@ -21,12 +15,6 @@ Install dependency:
 npm install
 ```
 
-Import database jika belum ada:
-
-```bash
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sik"
-mysql -u root -p sik < C:\Users\AURORA\Downloads\copilot\sik.sql
-```
 
 Buat atau sesuaikan file `.env` di root project:
 
@@ -34,8 +22,8 @@ Buat atau sesuaikan file `.env` di root project:
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=sik
-DB_USER=aurora
-DB_PASSWORD=auroralink
+DB_USER=dbusername
+DB_PASSWORD=dbpassword
 
 PORT=5005
 NODE_ENV=development
