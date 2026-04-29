@@ -24,7 +24,17 @@ function getStatusFromKeterangan(keterangan) {
     }
 }
 
+/**
+ * Map permintaan_lab.status to periksa_lab.status enum value
+ * @param {string} status - Visit status from permintaan_lab (ralan/ranap)
+ * @returns {string} Valid periksa_lab.status value (Ralan/Ranap)
+ */
+function getPeriksaLabStatus(status) {
+    return String(status).toLowerCase() === 'ranap' ? 'Ranap' : 'Ralan';
+}
+
 module.exports = {
-    getStatusFromKeterangan
+    getStatusFromKeterangan,
+    getPeriksaLabStatus
 };
 

@@ -47,7 +47,7 @@ Setiap item dalam array `pemeriksaan` harus memiliki:
 
 | Field | Type | Required | Description | Example |
 |-------|------|----------|-------------|---------|
-| `kode_pemeriksaan` | string/number | ✅ Yes | ID template pemeriksaan | `"1001"` atau `1001` |
+| `kode_pemeriksaan` | string/number | ✅ Yes | ID template pemeriksaan dari `template_laboratorium.id_template`, bukan kode/nama LIS | `"1001"` atau `1001` |
 | `hasil` | string | ✅ Yes | Hasil pemeriksaan | `"120"` atau `"Negatif"` |
 | `nilai_rujukan` | string | ❌ No | Nilai rujukan normal | `"70-100"` atau `"-"` |
 | `keterangan` | string | ❌ No | Keterangan hasil | `"Normal"` atau `"Tinggi"` |
@@ -69,31 +69,31 @@ curl -X POST http://localhost:5000/adam-lis/bridging/ \
     "jam_periksa": "21:57:08",
     "pemeriksaan": [
       {
-        "kode_pemeriksaan": "GDS",
+        "kode_pemeriksaan": 1001,
         "hasil": "120",
         "nilai_rujukan": "< 140",
         "keterangan": "Normal"
       },
       {
-        "kode_pemeriksaan": "GDP",
+        "kode_pemeriksaan": 1002,
         "hasil": "85",
         "nilai_rujukan": "70 - 110",
         "keterangan": "Normal"
       },
       {
-        "kode_pemeriksaan": "GD2JPP",
+        "kode_pemeriksaan": 1003,
         "hasil": "130",
         "nilai_rujukan": "< 140",
         "keterangan": "Normal"
       },
       {
-        "kode_pemeriksaan": "GLUSTICK",
+        "kode_pemeriksaan": 1004,
         "hasil": "95",
         "nilai_rujukan": "-",
         "keterangan": "-"
       },
       {
-        "kode_pemeriksaan": "HBA1C",
+        "kode_pemeriksaan": 1005,
         "hasil": "5.8",
         "nilai_rujukan": "< 6.5",
         "keterangan": "Normal"
@@ -122,31 +122,31 @@ const response = await fetch('http://localhost:5000/adam-lis/bridging/', {
     jam_periksa: "21:57:08",
     pemeriksaan: [
       {
-        kode_pemeriksaan: "GDS",
+        kode_pemeriksaan: 1001,
         hasil: "120",
         nilai_rujukan: "< 140",
         keterangan: "Normal"
       },
       {
-        kode_pemeriksaan: "GDP",
+        kode_pemeriksaan: 1002,
         hasil: "85",
         nilai_rujukan: "70 - 110",
         keterangan: "Normal"
       },
       {
-        kode_pemeriksaan: "GD2JPP",
+        kode_pemeriksaan: 1003,
         hasil: "130",
         nilai_rujukan: "< 140",
         keterangan: "Normal"
       },
       {
-        kode_pemeriksaan: "GLUSTICK",
+        kode_pemeriksaan: 1004,
         hasil: "95",
         nilai_rujukan: "-",
         keterangan: "-"
       },
       {
-        kode_pemeriksaan: "HBA1C",
+        kode_pemeriksaan: 1005,
         hasil: "5.8",
         nilai_rujukan: "< 6.5",
         keterangan: "Normal"
@@ -236,7 +236,7 @@ console.log(data);
       },
       "detail_pemeriksaan": [
         {
-          "kode_pemeriksaan": "GDS",
+          "kode_pemeriksaan": 1001,
           "nama_pemeriksaan": "Glukosa Sewaktu",
           "hasil": "120",
           "satuan": "mg/dL",
@@ -245,7 +245,7 @@ console.log(data);
           "status": "Normal"
         },
         {
-          "kode_pemeriksaan": "GDP",
+          "kode_pemeriksaan": 1002,
           "nama_pemeriksaan": "Glukosa Puasa",
           "hasil": "85",
           "satuan": "mg/dL",
@@ -254,7 +254,7 @@ console.log(data);
           "status": "Normal"
         },
         {
-          "kode_pemeriksaan": "GD2JPP",
+          "kode_pemeriksaan": 1003,
           "nama_pemeriksaan": "Glukosa 2 Jam PP",
           "hasil": "130",
           "satuan": "mg/dL",
@@ -263,7 +263,7 @@ console.log(data);
           "status": "Normal"
         },
         {
-          "kode_pemeriksaan": "GLUSTICK",
+          "kode_pemeriksaan": 1004,
           "nama_pemeriksaan": "Glukosa Stick",
           "hasil": "95",
           "satuan": "mg/dL",
@@ -272,7 +272,7 @@ console.log(data);
           "status": "Normal"
         },
         {
-          "kode_pemeriksaan": "HBA1C",
+          "kode_pemeriksaan": 1005,
           "nama_pemeriksaan": "HbA1C",
           "hasil": "5.8",
           "satuan": "%",
@@ -343,7 +343,7 @@ console.log(data);
 1. **Authentication Required:** Semua request harus menyertakan JWT token di header `Authorization`
 2. **Date Format:** `tgl_periksa` harus dalam format `YYYY-MM-DD` (contoh: `2025-11-01`)
 3. **Time Format:** `jam_periksa` harus dalam format `HH:mm:ss` (contoh: `16:00:38`)
-4. **Kode Pemeriksaan:** Harus sesuai dengan `id_template` yang ada di tabel `template_laboratorium`
+4. **Kode Pemeriksaan:** Harus sesuai dengan `id_template` yang ada di tabel `template_laboratorium`, bukan kode/nama pemeriksaan dari LIS
 5. **Kode Dokter:** `dokter_pj` dan `dokter_perujuk` harus valid di database
 6. **Kode Petugas:** `petugas` harus valid NIP di database
 7. **Pemeriksaan Array:** Minimal harus ada 1 item pemeriksaan
@@ -358,7 +358,7 @@ console.log(data);
 - `tgl_periksa`: Required, format YYYY-MM-DD
 - `jam_periksa`: Required, format HH:mm:ss
 - `pemeriksaan`: Required, array tidak boleh kosong
-- `pemeriksaan[].kode_pemeriksaan`: Required, tidak boleh kosong
+- `pemeriksaan[].kode_pemeriksaan`: Required, tidak boleh kosong, harus berisi `template_laboratorium.id_template`
 - `pemeriksaan[].hasil`: Required, tidak boleh kosong
 - `pemeriksaan[].nilai_rujukan`: Optional
 - `pemeriksaan[].keterangan`: Optional

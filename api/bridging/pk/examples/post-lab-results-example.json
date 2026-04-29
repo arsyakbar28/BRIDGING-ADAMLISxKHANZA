@@ -7,31 +7,31 @@
   "jam_periksa": "21:57:08",
   "pemeriksaan": [
     {
-      "kode_pemeriksaan": "GDS",
+      "kode_pemeriksaan": 1001,
       "hasil": "120",
       "nilai_rujukan": "< 140",
       "keterangan": "Normal"
     },
     {
-      "kode_pemeriksaan": "GDP",
+      "kode_pemeriksaan": 1002,
       "hasil": "85",
       "nilai_rujukan": "70 - 110",
       "keterangan": "Normal"
     },
     {
-      "kode_pemeriksaan": "GD2JPP",
+      "kode_pemeriksaan": 1003,
       "hasil": "130",
       "nilai_rujukan": "< 140",
       "keterangan": "Normal"
     },
     {
-      "kode_pemeriksaan": "GLUSTICK",
+      "kode_pemeriksaan": 1004,
       "hasil": "95",
       "nilai_rujukan": "-",
       "keterangan": "-"
     },
     {
-      "kode_pemeriksaan": "HBA1C",
+      "kode_pemeriksaan": 1005,
       "hasil": "5.8",
       "nilai_rujukan": "< 6.5",
       "keterangan": "Normal"

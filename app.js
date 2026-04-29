@@ -6,10 +6,14 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 
 // Import routes
 const bridgingRoutes = require('./api/bridging/routes');
+const paRoutes = require('./api/bridging/pa/routes');
+const mbRoutes = require('./api/bridging/mb/routes');
 const authRoutes = require('./api/auth/routes');
+const swaggerRoutes = require('./api/docs/swagger.routes');
 
 // Import middleware
 const { authenticateToken } = require('./middleware/auth.middleware');
@@ -24,9 +28,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Public Routes (no authentication required)
 app.use('/api/auth', authRoutes);
+app.use('/api-docs', swaggerRoutes);
+app.use('/swagger', swaggerRoutes);
 
 // Protected API Routes (authentication required)
 app.use('/adam-lis/bridging', authenticateToken, bridgingRoutes);
+app.use('/api/v1/adamlis/patologi-anatomi/bridging', authenticateToken, paRoutes);
+app.use('/api/v2/adamlis/mikrobiologi/bridging', authenticateToken, mbRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -77,6 +85,8 @@ const server = app.listen(PORT, () => {
     console.log(`🌐 URL API: http://localhost:${PORT}`);
     console.log(`📋 Endpoints tersedia:`);
     console.log(`   ✅ Health Check: http://localhost:${PORT}/api/health`);
+    console.log(`   📚 Swagger Sandbox: http://localhost:${PORT}/api-docs`);
+    console.log(`   📄 OpenAPI JSON: http://localhost:${PORT}/api-docs/openapi.json`);
     console.log(``);
     console.log(`   🔐 Authentication (Public):`);
     console.log(`      POST /api/auth/login - Login dan dapatkan token`);
@@ -85,11 +95,23 @@ const server = app.listen(PORT, () => {
     console.log(`   🔬 PK (Patologi Klinis) - Protected (requires token):`);
     console.log(`      GET  /adam-lis/bridging/:limit/:noorder`);
     console.log(`      GET  /adam-lis/bridging/lab-results-pk/:limit/:noorder`);
+    console.log(`      POST /adam-lis/bridging/update-hasil`);
     console.log(`      POST /adam-lis/bridging/`);
-    console.log(`   📝 Note: Tambahkan header "Authorization: Bearer <token>" untuk akses`);
     console.log(``);
-    console.log(`   🚧 PA (Patologi Anatomi): Coming Soon`);
-    console.log(`   🚧 MB (Mikrobiologi): Coming Soon`);
+    console.log(`   🧬 PA (Patologi Anatomi) - Protected (requires token):`);
+    console.log(`      POST /api/v1/adamlis/patologi-anatomi/bridging/registrasi`);
+    console.log(`      GET  /api/v1/adamlis/patologi-anatomi/bridging/registrasi/:no_reg_rs`);
+    console.log(`      POST /api/v1/adamlis/patologi-anatomi/bridging/arsip`);
+    console.log(`      PUT  /api/v1/adamlis/patologi-anatomi/bridging/arsip`);
+    console.log(`      GET  /adam-lis/bridging/pa/:limit/:noorder`);
+    console.log(``);
+    console.log(`   🦠 MB (Mikrobiologi) - Protected (requires token):`);
+    console.log(`      POST /api/v2/adamlis/mikrobiologi/bridging/registrasi`);
+    console.log(`      GET  /api/v2/adamlis/mikrobiologi/bridging/registrasi/:no_reg_rs`);
+    console.log(`      POST /api/v2/adamlis/mikrobiologi/bridging/arsip`);
+    console.log(`      PUT  /api/v2/adamlis/mikrobiologi/bridging/arsip/:no_lab`);
+    console.log(`      GET  /adam-lis/bridging/mb/:limit/:noorder`);
+    console.log(`   📝 Note: Tambahkan header "Authorization: Bearer <token>" untuk akses`);
     console.log(``);
     console.log(`✅ Connection pool initialized (max 10 connections)`);
     console.log(`✅ Modular backend structure (PK/PA/MB separated)`);

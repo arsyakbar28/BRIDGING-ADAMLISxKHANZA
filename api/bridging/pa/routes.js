@@ -8,18 +8,13 @@
 const express = require('express');
 const router = express.Router();
 
-/**
- * Placeholder endpoints
- * Will be implemented in the future
- */
+const patientController = require('./controllers/patient-registration-pa.controller');
 
-router.get('/:limit/:noorder', (req, res) => {
-    res.status(501).json({
-        success: false,
-        message: "PA endpoints not yet implemented",
-        payload: []
-    });
-});
+router.post('/registrasi', patientController.createRegistration);
+router.get('/registrasi/:no_reg_rs', patientController.getRegistrationByNoRegRs);
+router.post('/arsip', patientController.postArchive);
+router.put('/arsip', patientController.updateArchive);
+router.get('/:limit/:noorder', patientController.searchPatientRegistration);
 
 module.exports = router;
 

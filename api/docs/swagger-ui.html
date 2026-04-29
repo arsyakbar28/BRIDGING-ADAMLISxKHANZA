@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Adam LIS x Khanza API Documentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        accent:      '#198754',
+                        'accent-dk': '#12633f',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Swagger UI internal overrides — cannot be done with utility classes */
+        .topbar { display: none; }
+
+        #swagger-ui {
+            width: min(1180px, calc(100% - 40px));
+            margin: 0 auto 48px;
+        }
+
+        .swagger-ui .info          { margin: 24px 0; }
+        .swagger-ui .scheme-container {
+            border-radius: 8px;
+            box-shadow: none;
+            border: 1px solid #d9e0e8;
+        }
+        .swagger-ui .opblock       { border-radius: 8px; }
+        .swagger-ui .opblock-tag   { border-bottom-color: #d9e0e8; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 font-sans">
+
+    <!-- ================================================================
+         HEADER
+    ================================================================ -->
+    <header class="bg-white border-b border-gray-200">
+        <div class="w-[min(1180px,calc(100%-40px))] mx-auto">
+
+            <!-- Hero -->
+            <section class="pt-8 pb-6">
+                <p class="m-0 mb-2.5 text-[11px] font-extrabold uppercase tracking-wide text-accent-dk">
+                    API Documentation
+                </p>
+                <h1 class="m-0 max-w-[820px] text-[42px] leading-[1.08] font-bold text-slate-800">
+                    Adam LIS x Khanza Bridging
+                </h1>
+                <p class="max-w-[840px] mt-3.5 mb-0 text-slate-500 text-base leading-relaxed">
+                    Dokumentasi integrasi registrasi dan update hasil pemeriksaan antara SIMRS Khanza dan Adam LIS.
+                    Registrasi dapat memakai metode GET atau POST, sedangkan hasil pemeriksaan PK dikirim balik
+                    oleh Adam LIS dengan POST update-hasil.
+                </p>
+            </section>
+
+            <!-- Endpoint Cards -->
+            <section
+                class="grid grid-cols-4 gap-3 pb-6
+                       max-[980px]:grid-cols-2
+                       max-[640px]:grid-cols-1"
+                aria-label="Endpoint utama"
+            >
+                <article class="min-w-0 p-3.5 bg-white border border-gray-200 rounded-lg">
+                    <strong class="block mb-2 text-[13px] font-semibold">Local Sandbox</strong>
+                    <code class="block px-2 py-2 bg-slate-100 rounded-md text-slate-700 text-[12px] leading-[1.45] break-all whitespace-normal">
+                        http://localhost:5005
+                    </code>
+                </article>
+                <article class="min-w-0 p-3.5 bg-white border border-gray-200 rounded-lg">
+                    <strong class="block mb-2 text-[13px] font-semibold">PK Registrasi</strong>
+                    <code class="block px-2 py-2 bg-slate-100 rounded-md text-slate-700 text-[12px] leading-[1.45] break-all whitespace-normal">
+                        http://192.168.100.111:2311/adam-lis/bridging_sim_rs/registrasi
+                    </code>
+                </article>
+                <article class="min-w-0 p-3.5 bg-white border border-gray-200 rounded-lg">
+                    <strong class="block mb-2 text-[13px] font-semibold">PA Registrasi</strong>
+                    <code class="block px-2 py-2 bg-slate-100 rounded-md text-slate-700 text-[12px] leading-[1.45] break-all whitespace-normal">
+                        http://192.168.100.111:2312/api/v1/adamlis/patologi-anatomi/bridging/registrasi
+                    </code>
+                </article>
+                <article class="min-w-0 p-3.5 bg-white border border-gray-200 rounded-lg">
+                    <strong class="block mb-2 text-[13px] font-semibold">MK Registrasi</strong>
+                    <code class="block px-2 py-2 bg-slate-100 rounded-md text-slate-700 text-[12px] leading-[1.45] break-all whitespace-normal">
+                        http://192.168.100.111:2313/api/v2/adamlis/mikrobiologi/bridging/registrasi
+                    </code>
+                </article>
+            </section>
+
+            <!-- Install + Quick Commands -->
+            <section
+                class="grid grid-cols-[1.1fr_0.9fr] gap-3 pb-6
+                       max-[980px]:grid-cols-1"
+                aria-label="Instalasi dan setup"
+            >
+                <article class="min-w-0 p-4 bg-white border border-gray-200 rounded-lg">
+                    <h2 class="mt-0 mb-3 text-[18px] font-semibold">Instalasi &amp; Setup</h2>
+                    <ol class="m-0 pl-5 text-slate-500 text-sm leading-[1.65] space-y-1">
+                        <li>Pastikan Node.js, MySQL/MariaDB, dan database <code class="text-slate-700 bg-slate-100 px-1 rounded">sik</code> sudah tersedia.</li>
+                        <li>Install dependency dengan <code class="text-slate-700 bg-slate-100 px-1 rounded">npm install</code>.</li>
+                        <!-- <li>Import dump database <code class="text-slate-700 bg-slate-100 px-1 rounded">sik.sql</code> jika database belum terisi.</li> -->
+                        <li>Sesuaikan koneksi database dan credential auth di <code class="text-slate-700 bg-slate-100 px-1 rounded">.env</code>.</li>
+                        <li>Jalankan server dengan <code class="text-slate-700 bg-slate-100 px-1 rounded">npm start</code>, lalu buka Swagger di <code class="text-slate-700 bg-slate-100 px-1 rounded">/api-docs</code>.</li>
+                    </ol>
+                </article>
+                <article class="min-w-0 p-4 bg-white border border-gray-200 rounded-lg">
+                    <h2 class="mt-0 mb-3 text-[18px] font-semibold">.env</h2>
+                    <pre class="m-0 bg-slate-900 text-slate-50 text-xs rounded-lg">
+                    <code>
+                        DB_PORT=3306
+                        DB_NAME=sik
+                        DB_USER=username
+                        DB_PASSWORD=password
+                        PORT=5005
+                    </code>
+                </pre>
+                                 
+                </article>
+            </section>
+
+            <!-- Registration Flow -->
+            <section
+                class="grid grid-cols-3 gap-2 py-4 border-t border-gray-200
+                       max-[980px]:grid-cols-2
+                       max-[640px]:grid-cols-1"
+                aria-label="Metode registrasi"
+            >
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">GET Registration</span>
+                    Adam LIS hit endpoint GET project ini untuk menarik order PK, PA, atau MK dari database Khanza.
+                </div>
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">POST Registration</span>
+                    Project/SIMRS hit endpoint POST registrasi yang dibuat Adam LIS sesuai jenis lab.
+                </div>
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">Pilih Satu</span>
+                    Untuk satu implementasi registrasi, gunakan GET atau POST. Jangan pakai keduanya untuk order yang sama.
+                </div>
+            </section>
+
+            <!-- Result Flow -->
+            <section
+                class="grid grid-cols-4 gap-2 py-4 border-t border-gray-200
+                       max-[980px]:grid-cols-2
+                       max-[640px]:grid-cols-1"
+                aria-label="Pengembalian hasil"
+            >
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">PK POST Update</span>
+                    Adam LIS hit <code class="text-slate-700 bg-white border border-gray-200 px-1 rounded text-[11px]">POST /adam-lis/bridging/update-hasil</code> untuk mengirim hasil dari analyzer ke SIMRS.
+                </div>
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">PA/MB Arsip</span>
+                    Adam LIS hit endpoint arsip PA/MB untuk create hasil, lalu PUT arsip jika ada revisi.
+                </div>
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">Mapping Service</span>
+                    Data disimpan ke tabel sesuai mapping dan service PK, PA, atau MK yang sudah dibuat.
+                </div>
+                <div class="min-w-0 px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-lg text-[13px] leading-[1.45]">
+                    <span class="block mb-1 font-extrabold text-accent-dk">Auth Lokal</span>
+                    Endpoint lokal protected memakai Bearer token dari Auth, sedangkan POST registrasi eksternal mengikuti aturan Adam LIS.
+                </div>
+            </section>
+
+            <!-- Note -->
+            <p class="px-3.5 py-3 mb-7 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-sm leading-[1.55]">
+                Ringkasnya: registrasi pilih salah satu metode GET atau POST. Untuk PK, update hasil pemeriksaan
+                dari LIS memakai POST <code class="bg-emerald-100 px-1 rounded text-[12px]">update-hasil</code>
+                dengan response SIMRS yang wajib mengikuti format sukses/gagal Adam LIS.
+            </p>
+            <!-- <section class="p-5 bg-white border border-slate-200 rounded-xl">
+            <h2 class="text-2xl font-bold text-slate-900">
+                Adam LIS x Khanza Bridging API
+            </h2>
+
+            <div class="flex flex-wrap gap-2 mt-3">
+                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Version 1.0.0
+                </span>
+                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+                OAS 3.0
+                </span>
+                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                /api-docs/openapi.json
+                </span>
+            </div>
+
+            <p class="mt-4 text-sm leading-relaxed text-slate-600">
+                Dokumentasi sandbox untuk integrasi Adam LIS dengan Khanza/SIMRS.
+            </p>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Ringkasan</h3>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                Project ini menyediakan dokumentasi dan endpoint bridging untuk layanan
+                <strong>Patologi Klinis (PK)</strong>, <strong>Patologi Anatomi (PA)</strong>,
+                dan <strong>Mikrobiologi (MB/MK)</strong>.
+            </p>
+
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                Integrasi registrasi dapat menggunakan salah satu dari dua metode:
+                <strong>GET Pull</strong>, yaitu Adam LIS menarik data order dari endpoint project ini,
+                atau <strong>POST Push</strong>, yaitu project/SIMRS mengirim registrasi ke endpoint
+                yang disediakan Adam LIS.
+            </p>
+
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                Setelah pemeriksaan selesai, Adam LIS mengirim hasil kembali ke endpoint project ini
+                agar data dibuat atau diperbarui di database <code class="px-1 py-0.5 rounded bg-slate-100">sik</code>.
+            </p>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Base URL</h3>
+
+            <div class="grid grid-cols-1 gap-3 mt-3 md:grid-cols-2">
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <strong class="block text-sm text-slate-800">Local Sandbox</strong>
+                <code class="block mt-1 text-xs break-all text-slate-600">
+                    http://localhost:5005
+                </code>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <strong class="block text-sm text-slate-800">PK Registrasi Eksternal</strong>
+                <code class="block mt-1 text-xs break-all text-slate-600">
+                    http://192.168.100.111:2311/adam-lis/bridging_sim_rs/registrasi
+                </code>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <strong class="block text-sm text-slate-800">PA Registrasi Eksternal</strong>
+                <code class="block mt-1 text-xs break-all text-slate-600">
+                    http://192.168.100.111:2312/api/v1/adamlis/patologi-anatomi/bridging/registrasi
+                </code>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <strong class="block text-sm text-slate-800">MK Registrasi Eksternal</strong>
+                <code class="block mt-1 text-xs break-all text-slate-600">
+                    http://192.168.100.111:2313/api/v2/adamlis/mikrobiologi/bridging/registrasi
+                </code>
+                </div>
+            </div>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Instalasi Project</h3>
+
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                Prasyarat: Node.js minimal versi 14, MySQL/MariaDB, dan database
+                <code class="px-1 py-0.5 rounded bg-slate-100">sik</code> dari Khanza/SIMRS.
+            </p>
+
+            <pre class="mt-3 p-4 overflow-x-auto rounded-lg bg-slate-900 text-slate-50 text-xs leading-relaxed"><code>cd D:\project\BRIDGING-ADAMLISxKHANZA
+            npm install
+            mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS sik"
+            mysql -u root -p sik &lt; C:\Users\AURORA\Downloads\copilot\sik.sql
+            npm start</code></pre>
+
+            <p class="mt-4 text-sm leading-relaxed text-slate-600">
+                Konfigurasi utama ada di file <code class="px-1 py-0.5 rounded bg-slate-100">.env</code>:
+            </p>
+
+            <pre class="mt-3 p-4 overflow-x-auto rounded-lg bg-slate-900 text-slate-50 text-xs leading-relaxed"><code>DB_HOST=localhost
+            DB_PORT=3306
+            DB_NAME=sik
+            DB_USER=aurora
+            DB_PASSWORD=auroralink
+            PORT=5005
+            AUTH_USERNAME=admin
+            AUTH_PASSWORD=admin123
+            DEFAULT_LAB_PETUGAS_NIP=-
+            DEFAULT_LAB_DOKTER_KD=-</code></pre>
+
+            <p class="mt-3 text-sm leading-relaxed text-slate-600">
+                Setelah server berjalan, buka
+                <code class="px-1 py-0.5 rounded bg-slate-100">http://localhost:5005/api-docs</code>
+                atau cek
+                <code class="px-1 py-0.5 rounded bg-slate-100">http://localhost:5005/api/health</code>.
+            </p>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Autentikasi Lokal</h3>
+
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                Gunakan <code class="px-1 py-0.5 rounded bg-slate-100">POST /api/auth/login</code>
+                untuk mengambil Bearer token, lalu klik tombol <strong>Authorize</strong> di Swagger UI.
+            </p>
+
+            <p class="mt-2 text-sm leading-relaxed text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                Token ini berlaku untuk endpoint lokal project yang ditandai protected,
+                bukan untuk endpoint registrasi eksternal LIS.
+            </p>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Cara Menggunakan Swagger</h3>
+
+            <ol class="mt-3 pl-5 list-decimal text-sm leading-relaxed text-slate-600 space-y-1">
+                <li>Jalankan server dengan <code class="px-1 py-0.5 rounded bg-slate-100">npm start</code>.</li>
+                <li>Buka <code class="px-1 py-0.5 rounded bg-slate-100">http://localhost:5005/api-docs</code>.</li>
+                <li>Login melalui <code class="px-1 py-0.5 rounded bg-slate-100">POST /api/auth/login</code>.</li>
+                <li>Klik <strong>Authorize</strong> dan isi <code class="px-1 py-0.5 rounded bg-slate-100">Bearer &lt;token&gt;</code>.</li>
+                <li>Pilih endpoint sesuai metode integrasi: registrasi GET Pull, registrasi POST Push, atau callback hasil dari LIS.</li>
+            </ol>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Metode Registrasi</h3>
+
+            <div class="grid grid-cols-1 gap-3 mt-3 md:grid-cols-3">
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <strong class="block text-sm text-slate-800">GET Pull</strong>
+                <p class="mt-1 text-sm leading-relaxed text-slate-600">
+                    Adam LIS hit endpoint GET registration/order dari project ini.
+                    Berlaku untuk PK, PA, dan MB/MK.
+                </p>
+                </div>
+
+                <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <strong class="block text-sm text-slate-800">POST Push</strong>
+                <p class="mt-1 text-sm leading-relaxed text-slate-600">
+                    Project/SIMRS hit endpoint POST registrasi yang dibuat Adam LIS.
+                    Swagger menampilkan placeholder server eksternal untuk PK, PA, dan MB/MK.
+                </p>
+                </div>
+
+                <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                <strong class="block text-sm text-emerald-900">Pilih Salah Satu</strong>
+                <p class="mt-1 text-sm leading-relaxed text-emerald-900">
+                    Jangan gunakan GET Pull dan POST Push bersamaan untuk order yang sama.
+                </p>
+                </div>
+            </div>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Pengembalian Hasil</h3>
+
+            <ul class="mt-3 pl-5 list-disc text-sm leading-relaxed text-slate-600 space-y-2">
+                <li>
+                <strong>PK:</strong> Adam LIS hit
+                <code class="px-1 py-0.5 rounded bg-slate-100">POST /adam-lis/bridging/update-hasil</code>
+                untuk mengirim hasil pemeriksaan yang sudah diolah analyzer ke SIMRS.
+                Endpoint ini bersifat create/update sesuai payload yang dikirim.
+                </li>
+                <li>
+                <strong>PA/MB:</strong> Adam LIS hit POST arsip untuk create hasil baru,
+                lalu PUT arsip jika ada revisi atau perubahan hasil.
+                </li>
+                <li>
+                Project menyimpan atau memperbarui data ke database
+                <code class="px-1 py-0.5 rounded bg-slate-100">sik</code>
+                sesuai mapping service masing-masing lab agar Khanza konsisten dengan LIS.
+                </li>
+            </ul>
+
+            <hr class="my-5 border-slate-200">
+
+            <h3 class="text-lg font-bold text-slate-900">Alur Integrasi Umum</h3>
+
+            <ol class="mt-3 pl-5 list-decimal text-sm leading-relaxed text-slate-600 space-y-1">
+                <li>SIMRS/Khanza menyiapkan order pemeriksaan lab.</li>
+                <li>Pilih metode registrasi: Adam LIS GET ke project ini, atau project POST ke Adam LIS.</li>
+                <li>Adam LIS memproses pemeriksaan pasien.</li>
+                <li>Adam LIS mengirim hasil selesai melalui endpoint callback project ini.</li>
+                <li>Jika ada revisi, Adam LIS mengirim ulang data update sesuai metode endpoint masing-masing lab.</li>
+            </ol>
+            </section> -->
+        </div><!-- /docs-wrap -->
+    </header>
+
+    <!-- ================================================================
+         SWAGGER UI
+    ================================================================ -->
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.ui = SwaggerUIBundle({
+            url: '/api-docs/openapi.json',
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            displayRequestDuration: true,
+            persistAuthorization: true,
+            tryItOutEnabled: true,
+            docExpansion: 'list',
+            filter: true,
+            showExtensions: true,
+            showCommonExtensions: true,
+            defaultModelsExpandDepth: 1,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            layout: 'StandaloneLayout'
+        });
+    </script>
+</body>
+</html>
