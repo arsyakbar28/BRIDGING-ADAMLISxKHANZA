@@ -9,10 +9,19 @@
 const express = require('express');
 const router = express.Router();
 
-// Import PK controllers directly (backward compatible)
+// Import routes/controllers
+const paRoutes = require('./pa/routes');
+const mbRoutes = require('./mb/routes');
 const patientController = require('./pk/controllers/patient-registration-pk.controller');
 const labResultsController = require('./pk/controllers/lab-results-pk.controller');
 const postLabController = require('./pk/controllers/post-lab-pk.controller');
+
+/**
+ * PA Routes
+ * Keep specific prefixes before dynamic PK route.
+ */
+router.use('/pa', paRoutes);
+router.use('/mb', mbRoutes);
 
 /**
  * PK Routes (Backward Compatible - no /pk prefix)

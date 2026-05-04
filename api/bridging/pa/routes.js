@@ -1,25 +1,17 @@
 /**
  * PA (Patologi Anatomi) Routes
  * All routes for PA lab type
- * 
- * TODO: Implement PA endpoints
  */
 
 const express = require('express');
 const router = express.Router();
+const patientController = require('./controllers/patient-registration-pa.controller');
+const postLabController = require('./controllers/post-lab-pa.controller');
 
-/**
- * Placeholder endpoints
- * Will be implemented in the future
- */
+// GET /adam-lis/bridging/pa/:limit/:noorder
+router.get('/:limit/:noorder', patientController.searchPatientRegistration);
 
-router.get('/:limit/:noorder', (req, res) => {
-    res.status(501).json({
-        success: false,
-        message: "PA endpoints not yet implemented",
-        payload: []
-    });
-});
+// POST /adam-lis/bridging/pa
+router.post('/', postLabController.postLabResults);
 
 module.exports = router;
-
