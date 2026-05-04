@@ -6,6 +6,16 @@
 const { getDbConnection, closeDbConnection } = require('../../../../config/database');
 const labRepository = require('../repositories/lab-mb.repository');
 
+function formatDateLocal(date) {
+    if (!date) return '-';
+    if (typeof date === 'string') return date.slice(0, 10);
+    const d = date instanceof Date ? date : new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 /**
  * Get lab results by noorder
  * @param {string} noorder - Order number
@@ -57,7 +67,7 @@ async function getLabResultsByNoorder(noorder, limit = 10) {
                     dokter_pj: detail.nm_dokter,
                     petugas: detail.nama_petugas,
                     dokter_perujuk: detail.dokter_perujuk,
-                    tgl_periksa: periksa.tgl_periksa,
+                    tgl_periksa: formatDateLocal(periksa.tgl_periksa),
                     jam_periksa: periksa.jam,
                     no_rawat: periksa.no_rawat,
                     detail_pemeriksaan: pemeriksaanData
