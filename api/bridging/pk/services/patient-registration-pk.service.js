@@ -117,7 +117,7 @@ async function searchPatientRegistration(noorder, limit = 10) {
                 waktu_registrasi: result.waktu_registrasi_formatted,
                 diagnosa_awal: result.diagnosa_klinis,
                 keterangan_klinis: result.informasi_tambahan || "-",
-                kodeRS: "N02",
+                kodeRS: process.env.KODE_RS || 'N02',
                 pasien: {
                     no_rm: result.no_rkm_medis,
                     nama: result.nm_pasien,
@@ -140,10 +140,9 @@ async function searchPatientRegistration(noorder, limit = 10) {
                     nama: result.png_jawab || "UMUM",
                     kode: result.kd_pj || "0001"
                 },
-                icdt: diagnosaResults.length > 0 ? diagnosaResults.map(diagnosa => ({
-                    nama: diagnosa.nm_penyakit || "null",
-                    kode: diagnosa.kd_penyakit || "null"
-                })) : []
+                icdt: diagnosaResults.length > 0
+                    ? { nama: diagnosaResults[0].nm_penyakit || "-", kode: diagnosaResults[0].kd_penyakit || "-" }
+                    : { nama: "-", kode: "-" }
             };
 
             payload.push(registrationData);

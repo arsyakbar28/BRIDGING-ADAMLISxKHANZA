@@ -117,7 +117,7 @@ async function searchPatientRegistration(noorder, limit = 10) {
                 waktu_registrasi: result.waktu_registrasi_formatted,
                 diagnosa_awal: result.diagnosa_klinis,
                 keterangan_klinis: result.informasi_tambahan || "-",
-                kodeRS: "N02",
+                kodeRS: process.env.KODE_RS || 'N02',
                 pasien: {
                     no_rm: result.no_rkm_medis,
                     nama: result.nm_pasien,
