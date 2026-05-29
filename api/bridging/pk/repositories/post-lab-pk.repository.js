@@ -89,6 +89,7 @@ async function validatePetugas(conn, nip) {
 
 /**
  * Delete old lab data for specific order (no_rawat + tgl_periksa + jam)
+ * ⚠️ DEPRECATED: Not used anymore since we use ON DUPLICATE KEY UPDATE for auto-replace
  * This ensures multiple orders for the same patient on the same day don't interfere with each other
  */
 async function deleteOldLabData(conn, no_rawat, tgl_periksa, jam) {
@@ -117,13 +118,13 @@ async function deleteOldLabData(conn, no_rawat, tgl_periksa, jam) {
  */
 async function insertPeriksaLab(conn, data) {
     const query = `
-        INSERT INTO periksa_lab 
-        (no_rawat, nip, kd_jenis_prw, tgl_periksa, jam, dokter_perujuk, bagian_rs, bhp, 
-         tarif_perujuk, tarif_tindakan_dokter, tarif_tindakan_petugas, kso, menejemen, 
+        INSERT INTO periksa_lab
+        (no_rawat, nip, kd_jenis_prw, tgl_periksa, jam, dokter_perujuk, bagian_rs, bhp,
+         tarif_perujuk, tarif_tindakan_dokter, tarif_tindakan_petugas, kso, menejemen,
          biaya, kd_dokter, status, kategori)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    
+
     await conn.execute(query, [
         data.no_rawat,
         data.nip,
@@ -150,12 +151,12 @@ async function insertPeriksaLab(conn, data) {
  */
 async function insertDetailPeriksaLab(conn, data) {
     const query = `
-        INSERT INTO detail_periksa_lab 
-        (no_rawat, kd_jenis_prw, tgl_periksa, jam, id_template, nilai, nilai_rujukan, keterangan, 
+        INSERT INTO detail_periksa_lab
+        (no_rawat, kd_jenis_prw, tgl_periksa, jam, id_template, nilai, nilai_rujukan, keterangan,
          bagian_rs, bhp, bagian_perujuk, bagian_dokter, bagian_laborat, kso, menejemen, biaya_item)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    
+
     await conn.execute(query, [
         data.no_rawat,
         data.kd_jenis_prw,
@@ -193,11 +194,70 @@ async function updatePermintaanLab(conn, noorder, tgl_periksa, jam_periksa) {
  */
 async function insertSaranKesanLab(conn, no_rawat, tgl_periksa, jam_periksa, kesan, saran) {
     const query = `
-        INSERT INTO saran_kesan_lab 
+        INSERT INTO saran_kesan_lab
         (no_rawat, tgl_periksa, jam, kesan, saran)
         VALUES (?, ?, ?, ?, ?)
     `;
     await conn.execute(query, [no_rawat, tgl_periksa, jam_periksa, kesan || '', saran || '']);
+}
+
+/**
+ * Get requested examinations and their group components for validation
+ * Handles group examinations (parent-child relationship)
+ */
+async function getRequestedExaminations(conn, noorder) {
+    // 1. Get directly requested examinations
+    const directQuery = `
+        SELECT DISTINCT
+            pdpl.id_template,
+            tl.Pemeriksaan as nama_pemeriksaan,
+            pdpl.kd_jenis_prw,
+            tl.kd_jenis_prw as template_kd_jenis_prw
+        FROM permintaan_detail_permintaan_lab pdpl
+        INNER JOIN template_laboratorium tl ON pdpl.id_template = tl.id_template
+        WHERE pdpl.noorder = ?
+        ORDER BY tl.urut, tl.id_template
+    `;
+
+    const [directResults] = await conn.execute(directQuery, [noorder]);
+
+    // 2. Get all examinations in the same kd_jenis_prw groups
+    // This handles cases where group examination is requested but individual components are sent
+    const allowedExaminations = new Set();
+    const groupCodes = new Set();
+
+    directResults.forEach(exam => {
+        allowedExaminations.add(String(exam.id_template));
+        groupCodes.add(exam.template_kd_jenis_prw);
+    });
+
+    // 3. Get all examinations in the same groups
+    if (groupCodes.size > 0) {
+        const groupQuery = `
+            SELECT DISTINCT
+                tl.id_template,
+                tl.Pemeriksaan as nama_pemeriksaan,
+                tl.kd_jenis_prw,
+                tl.kd_jenis_prw as template_kd_jenis_prw
+            FROM template_laboratorium tl
+            WHERE tl.kd_jenis_prw IN (${Array.from(groupCodes).map(() => '?').join(',')})
+            ORDER BY tl.kd_jenis_prw, tl.urut, tl.id_template
+        `;
+
+        const [groupResults] = await conn.execute(groupQuery, Array.from(groupCodes));
+
+        return {
+            direct_requested: directResults,
+            group_allowed: groupResults,
+            allowed_template_ids: new Set(groupResults.map(r => String(r.id_template)))
+        };
+    }
+
+    return {
+        direct_requested: directResults,
+        group_allowed: directResults,
+        allowed_template_ids: allowedExaminations
+    };
 }
 
 module.exports = {
@@ -210,6 +270,7 @@ module.exports = {
     insertPeriksaLab,
     insertDetailPeriksaLab,
     updatePermintaanLab,
-    insertSaranKesanLab
+    insertSaranKesanLab,
+    getRequestedExaminations
 };
 

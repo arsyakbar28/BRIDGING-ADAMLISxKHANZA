@@ -49,7 +49,7 @@ async function postLabResults(noorder, labData) {
         const no_rawat = await postLabRepository.getLabRequestInfo(conn, noorder);
         if (!no_rawat) {
             await conn.rollback();
-            
+
             // Log error: noorder not found
             logPostError({
                 error: new Error(`No lab request found for noorder: ${noorder}`),
@@ -58,14 +58,34 @@ async function postLabResults(noorder, labData) {
                 endpoint: '/adam-lis/bridging/pk',
                 method: 'POST'
             });
-            
+
             return {
                 success: false,
                 message: `No lab request found for noorder: ${noorder}`,
                 payload: []
             };
         }
-        
+
+        // 🔍 VALIDATE: Check that requested examinations match lab request
+        const examValidation = await postLabRepository.getRequestedExaminations(conn, noorder);
+        if (examValidation.direct_requested.length === 0) {
+            await conn.rollback();
+
+            logPostError({
+                error: new Error(`No examinations found in lab request for noorder: ${noorder}`),
+                noorder,
+                requestBody: labData,
+                endpoint: '/adam-lis/bridging/pk',
+                method: 'POST'
+            });
+
+            return {
+                success: false,
+                message: `No examinations found in lab request for noorder: ${noorder}`,
+                payload: []
+            };
+        }
+
         // Extract data from labData
         const {
             pemeriksaan,
@@ -77,6 +97,76 @@ async function postLabResults(noorder, labData) {
             kesan,
             saran
         } = labData;
+
+        // 📋 VALIDATE: Check pemeriksaan yang dikirim sesuai dengan grup permintaan lab
+        const allowedTemplateIds = examValidation.allowed_template_ids;
+        const sentExaminations = pemeriksaan.map(p => {
+            // Resolve ID template sama seperti logic di bawah
+            const k = p.kode_pemeriksaan;
+            const ket = p.keterangan;
+            const numKet = ket != null && String(ket).trim() !== '' && !isNaN(Number(ket)) ? Number(ket) : null;
+            if (numKet != null) return String(numKet);
+            if (typeof k === 'number' && !isNaN(k)) return String(k);
+            if (typeof k === 'string' && k.trim() !== '' && !isNaN(Number(k))) return String(Number(k));
+            return String(k);
+        });
+
+        // Cek pemeriksaan yang tidak diizinkan (di luar grup)
+        const invalidExaminations = [];
+        sentExaminations.forEach((sentId, index) => {
+            if (!allowedTemplateIds.has(sentId)) {
+                invalidExaminations.push({
+                    index: index + 1,
+                    kode_pemeriksaan: sentId,
+                    nama_pemeriksaan: pemeriksaan[index].nama_pemeriksaan
+                });
+            }
+        });
+
+        if (invalidExaminations.length > 0) {
+            await conn.rollback();
+
+            let errorMessage = 'Pemeriksaan yang dikirim tidak sesuai dengan permintaan lab:\n';
+
+            errorMessage += `\n❌ Pemeriksaan yang TIDAK diminta/diizinkan:\n`;
+            invalidExaminations.forEach(inv => {
+                errorMessage += `  - ${inv.nama_pemeriksaan} (kode: ${inv.kode_pemeriksaan})\n`;
+            });
+
+            errorMessage += `\n📋 Permintaan lab asli untuk noorder ${noorder}:\n`;
+            examValidation.direct_requested.forEach(req => {
+                errorMessage += `  - ${req.nama_pemeriksaan} (kode: ${req.id_template})\n`;
+            });
+
+            errorMessage += `\n✅ Pemeriksaan yang diizinkan (dalam grup yang sama):\n`;
+            examValidation.group_allowed.forEach(allowed => {
+                errorMessage += `  - ${allowed.nama_pemeriksaan} (kode: ${allowed.id_template})\n`;
+            });
+
+            logPostError({
+                error: new Error('Examination mismatch with lab request'),
+                noorder,
+                requestBody: labData,
+                endpoint: '/adam-lis/bridging/pk',
+                method: 'POST',
+                validationDetails: {
+                    direct_requested: examValidation.direct_requested,
+                    group_allowed: examValidation.group_allowed,
+                    sent: pemeriksaan,
+                    invalid: invalidExaminations
+                }
+            });
+
+            return {
+                success: false,
+                message: errorMessage.trim(),
+                payload: {
+                    requested_examinations: examValidation.direct_requested,
+                    allowed_examinations: examValidation.group_allowed,
+                    invalid_examinations: invalidExaminations
+                }
+            };
+        }
         
         const petugasNip = petugas;
         const dokterCode = dokter_pj;
@@ -163,6 +253,15 @@ async function postLabResults(noorder, labData) {
             return String(hasil);
         };
 
+        // 📏 Validate text length berdasarkan konfigurasi DB masing-masing RS
+        const validateTextLength = (text, fieldName, envVarName) => {
+            const maxLength = parseInt(process.env[envVarName] || '0');
+            // Skip validation jika maxLength = 0 (biarkan database handle)
+            if (maxLength > 0 && text && text.length > maxLength) {
+                throw new Error(`${fieldName} terlalu panjang (${text.length} karakter). Maksimal ${maxLength} karakter untuk DB RS ini.`);
+            }
+        };
+
         const normalizeNilaiRujukan = (p, template) => {
             if (p.nilai_rujukan !== null && p.nilai_rujukan !== undefined && p.nilai_rujukan.toString().trim() !== '') return p.nilai_rujukan.toString().trim();
             if (typeof p.hasil === 'object' && p.hasil !== null && p.hasil.nilai_rujukan != null) return String(p.hasil.nilai_rujukan).trim();
@@ -184,6 +283,13 @@ async function postLabResults(noorder, labData) {
 
             const hasilStr = normalizeHasil(p.hasil);
             const nilaiRujukanStr = normalizeNilaiRujukan(p, template);
+            const keteranganStr = (p.keterangan != null && p.keterangan !== '') ? String(p.keterangan).trim() : "";
+
+            // 📏 Validate text length sebelum insert ke database (berdasarkan konfigurasi RS)
+            validateTextLength(hasilStr, `Hasil pemeriksaan "${p.nama_pemeriksaan}"`, 'DB_LIMIT_HASIL_PEMERIKSAAN');
+            validateTextLength(nilaiRujukanStr, `Nilai rujukan "${p.nama_pemeriksaan}"`, 'DB_LIMIT_NILAI_RUJUKAN');
+            validateTextLength(keteranganStr, `Keterangan "${p.nama_pemeriksaan}"`, 'DB_LIMIT_KETERANGAN');
+
             // Normalisasi untuk DB: ganti simbol Unicode (≤, ≥, dll) ke ASCII agar tidak error charset
             tindakanMap[kode_tindakan].pemeriksaan.push({
                 kode_pemeriksaan: template.id_template,
@@ -191,7 +297,7 @@ async function postLabResults(noorder, labData) {
                 hasil: normalizeStringForDb(hasilStr),
                 satuan: template.satuan || "-",
                 nilai_rujukan: normalizeStringForDb(nilaiRujukanStr),
-                keterangan: normalizeStringForDb((p.keterangan != null && p.keterangan !== '') ? String(p.keterangan).trim() : "")
+                keterangan: normalizeStringForDb(keteranganStr)
             });
         });
 
@@ -389,6 +495,10 @@ async function postLabResults(noorder, labData) {
         
         // Insert saran kesan if provided
         if (kesan || saran) {
+            // 📏 Validate kesan & saran text length (berdasarkan konfigurasi RS)
+            validateTextLength(kesan, "Kesan", 'DB_LIMIT_KESAN');
+            validateTextLength(saran, "Saran", 'DB_LIMIT_SARAN');
+
             await postLabRepository.insertSaranKesanLab(conn, no_rawat, tgl_periksa, jam_periksa, kesan, saran);
         }
         
@@ -400,11 +510,11 @@ async function postLabResults(noorder, labData) {
             success: true,
             message: `Lab results posted successfully for noorder: ${noorder}`,
             summary: {
-                noorder, 
-                no_rawat, 
+                noorder,
+                no_rawat,
                 total_tindakan: insertedPeriksaCount,
                 total_pemeriksaan: insertedDetailCount,
-                tgl_periksa, 
+                tgl_periksa,
                 jam_periksa
             },
             biaya_periksa: {
