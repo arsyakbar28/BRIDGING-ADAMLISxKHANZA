@@ -22,16 +22,31 @@ async function getLabRequestInfo(conn, noorder) {
  */
 async function bulkGetTemplateData(conn, kodePemeriksaanArray) {
     if (!kodePemeriksaanArray || kodePemeriksaanArray.length === 0) return [];
-    
+
     const query = `
         SELECT id_template, kd_jenis_prw, Pemeriksaan as nama_pemeriksaan,
-               satuan, urut
+               satuan, urut, bagian_rs, bhp, bagian_perujuk, bagian_dokter,
+               bagian_laborat, kso, menejemen, biaya_item
         FROM template_laboratorium
         WHERE id_template IN (${kodePemeriksaanArray.map(() => '?').join(',')})
         ORDER BY kd_jenis_prw, urut
     `;
     const [results] = await conn.execute(query, kodePemeriksaanArray);
-    return results;
+    return results.map(row => ({
+        id_template: row.id_template,
+        kd_jenis_prw: row.kd_jenis_prw,
+        nama_pemeriksaan: row.nama_pemeriksaan,
+        satuan: row.satuan,
+        urut: row.urut,
+        bagian_rs: parseFloat(row.bagian_rs) || 0,
+        bhp: parseFloat(row.bhp) || 0,
+        bagian_perujuk: parseFloat(row.bagian_perujuk) || 0,
+        bagian_dokter: parseFloat(row.bagian_dokter) || 0,
+        bagian_laborat: parseFloat(row.bagian_laborat) || 0,
+        kso: parseFloat(row.kso) || 0,
+        menejemen: parseFloat(row.menejemen) || 0,
+        biaya_item: parseFloat(row.biaya_item) || 0
+    }));
 }
 
 /**

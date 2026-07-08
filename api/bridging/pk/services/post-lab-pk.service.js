@@ -297,7 +297,15 @@ async function postLabResults(noorder, labData) {
                 hasil: normalizeStringForDb(hasilStr),
                 satuan: template.satuan || "-",
                 nilai_rujukan: normalizeStringForDb(nilaiRujukanStr),
-                keterangan: normalizeStringForDb(keteranganStr)
+                keterangan: normalizeStringForDb(keteranganStr),
+                bagian_rs: template.bagian_rs,
+                bhp: template.bhp,
+                bagian_perujuk: template.bagian_perujuk,
+                bagian_dokter: template.bagian_dokter,
+                bagian_laborat: template.bagian_laborat,
+                kso: template.kso,
+                menejemen: template.menejemen,
+                biaya_item: template.biaya_item
             });
         });
 
@@ -334,7 +342,40 @@ async function postLabResults(noorder, labData) {
         }
 
         let totalBiayaPeriksa = 0;
-        
+
+        const sumPemeriksaan = (items, field) => items.reduce((total, item) => total + (parseFloat(item[field]) || 0), 0);
+
+        const resolveTindakanTarif = (tarifData, items) => {
+            const headerHasTarif = tarifData.biaya_tindakan > 0;
+            const itemHasTarif = items.some(item => item.biaya_item > 0);
+
+            if (!headerHasTarif && itemHasTarif) {
+                return {
+                    mode: 'template',
+                    biaya_tindakan: sumPemeriksaan(items, 'biaya_item'),
+                    bagian_rs: sumPemeriksaan(items, 'bagian_rs'),
+                    bhp: sumPemeriksaan(items, 'bhp'),
+                    tarif_perujuk: sumPemeriksaan(items, 'bagian_perujuk'),
+                    tarif_tindakan_dokter: sumPemeriksaan(items, 'bagian_dokter'),
+                    tarif_tindakan_petugas: sumPemeriksaan(items, 'bagian_laborat'),
+                    kso: sumPemeriksaan(items, 'kso'),
+                    menejemen: sumPemeriksaan(items, 'menejemen')
+                };
+            }
+
+            return {
+                mode: headerHasTarif ? 'tindakan' : 'none',
+                biaya_tindakan: tarifData.biaya_tindakan,
+                bagian_rs: tarifData.bagian_rs,
+                bhp: tarifData.bhp,
+                tarif_perujuk: tarifData.tarif_perujuk,
+                tarif_tindakan_dokter: tarifData.tarif_tindakan_dokter,
+                tarif_tindakan_petugas: tarifData.tarif_tindakan_petugas,
+                kso: tarifData.kso,
+                menejemen: tarifData.menejemen
+            };
+        };
+
         // ✅ VALIDATE: Check if kode dokter exists
         const dokterExists = await postLabRepository.validateDokter(conn, dokterCode);
         if (!dokterExists) {
@@ -409,8 +450,9 @@ async function postLabResults(noorder, labData) {
         // Process each tindakan
         for (const tindakan of tindakanArray) {
             const tarifData = tarifMap[tindakan.kode_tindakan];
-            totalBiayaPeriksa += tarifData.biaya_tindakan;
-            
+            const resolvedTarif = resolveTindakanTarif(tarifData, tindakan.pemeriksaan);
+            totalBiayaPeriksa += resolvedTarif.biaya_tindakan;
+
             // Insert periksa_lab
             await postLabRepository.insertPeriksaLab(conn, {
                 no_rawat,
@@ -419,22 +461,44 @@ async function postLabResults(noorder, labData) {
                 tgl_periksa,
                 jam: jam_periksa,
                 dokter_perujuk,
-                bagian_rs: tarifData.bagian_rs,
-                bhp: tarifData.bhp,
-                tarif_perujuk: tarifData.tarif_perujuk,
-                tarif_tindakan_dokter: tarifData.tarif_tindakan_dokter,
-                tarif_tindakan_petugas: tarifData.tarif_tindakan_petugas,
-                kso: tarifData.kso,
-                menejemen: tarifData.menejemen,
-                biaya: tarifData.biaya_tindakan,
+                bagian_rs: resolvedTarif.bagian_rs,
+                bhp: resolvedTarif.bhp,
+                tarif_perujuk: resolvedTarif.tarif_perujuk,
+                tarif_tindakan_dokter: resolvedTarif.tarif_tindakan_dokter,
+                tarif_tindakan_petugas: resolvedTarif.tarif_tindakan_petugas,
+                kso: resolvedTarif.kso,
+                menejemen: resolvedTarif.menejemen,
+                biaya: resolvedTarif.biaya_tindakan,
                 kd_dokter: dokterCode,
                 status: tarifData.status || 'Ralan',
                 kategori: tarifData.kategori || 'PK'
             });
             insertedPeriksaCount++;
-            
+
             // Insert detail pemeriksaan
             for (const item of tindakan.pemeriksaan) {
+                const detailTarif = resolvedTarif.mode === 'template'
+                    ? {
+                        bagian_rs: item.bagian_rs,
+                        bhp: item.bhp,
+                        bagian_perujuk: item.bagian_perujuk,
+                        bagian_dokter: item.bagian_dokter,
+                        bagian_laborat: item.bagian_laborat,
+                        kso: item.kso,
+                        menejemen: item.menejemen,
+                        biaya_item: item.biaya_item
+                    }
+                    : {
+                        bagian_rs: 0,
+                        bhp: 0,
+                        bagian_perujuk: 0,
+                        bagian_dokter: 0,
+                        bagian_laborat: 0,
+                        kso: 0,
+                        menejemen: 0,
+                        biaya_item: 0
+                    };
+
                 await postLabRepository.insertDetailPeriksaLab(conn, {
                     no_rawat,
                     kd_jenis_prw: tindakan.kode_tindakan,
@@ -444,39 +508,40 @@ async function postLabResults(noorder, labData) {
                     nilai: item.hasil,
                     nilai_rujukan: item.nilai_rujukan,
                     keterangan: item.keterangan,
-                    bagian_rs: tarifData.bagian_rs,
-                    bhp: tarifData.bhp,
-                    bagian_perujuk: tarifData.tarif_perujuk,
-                    bagian_dokter: tarifData.tarif_tindakan_dokter,
-                    bagian_laborat: tarifData.tarif_tindakan_petugas,
-                    kso: tarifData.kso,
-                    menejemen: tarifData.menejemen,
-                    biaya_item: 0.0
+                    bagian_rs: detailTarif.bagian_rs,
+                    bhp: detailTarif.bhp,
+                    bagian_perujuk: detailTarif.bagian_perujuk,
+                    bagian_dokter: detailTarif.bagian_dokter,
+                    bagian_laborat: detailTarif.bagian_laborat,
+                    kso: detailTarif.kso,
+                    menejemen: detailTarif.menejemen,
+                    biaya_item: detailTarif.biaya_item
                 });
                 insertedDetailCount++;
             }
-            
+
             // Add to results
             allResults.push({
                 no_urut: allResults.length + 1,
                 kode_jenis_perawatan: tindakan.kode_tindakan,
                 nama_perawatan: tarifData.nm_perawatan,
+                tarif_mode: resolvedTarif.mode,
                 dokter_pj,
                 petugas,
                 dokter_perujuk,
                 tgl_periksa,
                 jam_periksa,
                 no_rawat,
-                biaya_tindakan: tarifData.biaya_tindakan,
+                biaya_tindakan: resolvedTarif.biaya_tindakan,
                 breakdown_biaya: {
-                    total: tarifData.biaya_tindakan,
-                    bagian_rs: tarifData.bagian_rs,
-                    bhp: tarifData.bhp,
-                    tarif_perujuk: tarifData.tarif_perujuk,
-                    tarif_tindakan_dokter: tarifData.tarif_tindakan_dokter,
-                    tarif_tindakan_petugas: tarifData.tarif_tindakan_petugas,
-                    kso: tarifData.kso,
-                    menejemen: tarifData.menejemen
+                    total: resolvedTarif.biaya_tindakan,
+                    bagian_rs: resolvedTarif.bagian_rs,
+                    bhp: resolvedTarif.bhp,
+                    tarif_perujuk: resolvedTarif.tarif_perujuk,
+                    tarif_tindakan_dokter: resolvedTarif.tarif_tindakan_dokter,
+                    tarif_tindakan_petugas: resolvedTarif.tarif_tindakan_petugas,
+                    kso: resolvedTarif.kso,
+                    menejemen: resolvedTarif.menejemen
                 },
                 detail_pemeriksaan: tindakan.pemeriksaan.map((item) => ({
                     kode_pemeriksaan: item.kode_pemeriksaan,
@@ -485,11 +550,12 @@ async function postLabResults(noorder, labData) {
                     satuan: item.satuan,
                     nilai_rujukan: item.nilai_rujukan,
                     keterangan: item.keterangan,
+                    biaya_item: resolvedTarif.mode === 'template' ? item.biaya_item : 0,
                     status: statusMapper.getStatusFromKeterangan(item.keterangan)
                 }))
             });
         }
-        
+
         // Update permintaan_lab
         await postLabRepository.updatePermintaanLab(conn, noorder, tgl_periksa, jam_periksa);
         
