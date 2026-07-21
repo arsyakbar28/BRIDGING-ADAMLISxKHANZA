@@ -46,8 +46,8 @@ async function postLabResults(noorder, labData) {
         await conn.beginTransaction();
         
         // Get no_rawat from permintaan_lab
-        const no_rawat = await postLabRepository.getLabRequestInfo(conn, noorder);
-        if (!no_rawat) {
+        const requestInfo = await postLabRepository.getLabRequestInfo(conn, noorder);
+        if (!requestInfo) {
             await conn.rollback();
 
             // Log error: noorder not found
@@ -65,6 +65,11 @@ async function postLabResults(noorder, labData) {
                 payload: []
             };
         }
+
+        const no_rawat = requestInfo.no_rawat;
+        const orderStatus = String(requestInfo.status || '').toLowerCase() === 'ranap'
+            ? 'Ranap'
+            : 'Ralan';
 
         // 🔍 VALIDATE: Check that requested examinations match lab request
         const examValidation = await postLabRepository.getRequestedExaminations(conn, noorder);
@@ -470,7 +475,7 @@ async function postLabResults(noorder, labData) {
                 menejemen: resolvedTarif.menejemen,
                 biaya: resolvedTarif.biaya_tindakan,
                 kd_dokter: dokterCode,
-                status: tarifData.status || 'Ralan',
+                status: orderStatus,
                 kategori: tarifData.kategori || 'PK'
             });
             insertedPeriksaCount++;
@@ -654,4 +659,3 @@ async function postLabResults(noorder, labData) {
 module.exports = {
     postLabResults
 };
-

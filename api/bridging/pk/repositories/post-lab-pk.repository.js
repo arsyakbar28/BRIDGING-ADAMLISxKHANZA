@@ -8,9 +8,9 @@
  */
 async function getLabRequestInfo(conn, noorder) {
     try {
-        const query = "SELECT no_rawat FROM permintaan_lab WHERE noorder = ?";
+        const query = "SELECT no_rawat, status FROM permintaan_lab WHERE noorder = ?";
         const [results] = await conn.execute(query, [noorder]);
-        return results.length > 0 ? results[0].no_rawat : null;
+        return results.length > 0 ? results[0] : null;
     } catch (error) {
         console.error('❌ Error getting lab request info:', error);
         return null;
