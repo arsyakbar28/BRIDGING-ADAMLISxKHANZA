@@ -54,7 +54,19 @@ async function searchPatientRegistration(noorder, limit = 10) {
 
         for (const result of results) {
             // Get selected pemeriksaan (only template_laboratorium that are actually selected/requested)
-            const selectedPemeriksaan = await patientRepository.getSelectedPemeriksaan(conn, result.noorder);
+            let selectedPemeriksaan = await patientRepository.getSelectedPemeriksaan(conn, result.noorder);
+
+            // Some Khanza installations only store requested actions in
+            // permintaan_pemeriksaan_lab without rows in the detail table.
+            if (selectedPemeriksaan.length === 0) {
+                const requestedTindakan = await patientRepository.getRequestedTindakan(conn, result.noorder);
+                const fallbackPemeriksaan = await Promise.all(
+                    requestedTindakan.map(tindakan => (
+                        patientRepository.getPemeriksaanByTindakan(conn, tindakan.kd_jenis_prw)
+                    ))
+                );
+                selectedPemeriksaan = fallbackPemeriksaan.flat();
+            }
 
             // Format pemeriksaan list (deduplicate by name to avoid duplicates)
             const allPemeriksaan = [];
@@ -171,4 +183,3 @@ async function searchPatientRegistration(noorder, limit = 10) {
 module.exports = {
     searchPatientRegistration
 };
-

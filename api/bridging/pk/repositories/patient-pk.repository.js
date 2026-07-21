@@ -147,12 +147,12 @@ async function searchPatientByNoorder(conn, noorder, limit) {
 async function getRequestedTindakan(conn, noorder) {
     const query = `
         SELECT DISTINCT 
-            pdpl.kd_jenis_prw,
+            ppl.kd_jenis_prw,
             jpl.nm_perawatan
-        FROM permintaan_detail_permintaan_lab pdpl
-        LEFT JOIN jns_perawatan_lab jpl ON pdpl.kd_jenis_prw = jpl.kd_jenis_prw
-        WHERE pdpl.noorder = ?
-        ORDER BY pdpl.kd_jenis_prw
+        FROM permintaan_pemeriksaan_lab ppl
+        LEFT JOIN jns_perawatan_lab jpl ON ppl.kd_jenis_prw = jpl.kd_jenis_prw
+        WHERE ppl.noorder = ?
+        ORDER BY ppl.kd_jenis_prw
     `;
     
     const [results] = await conn.execute(query, [noorder]);
@@ -229,4 +229,3 @@ module.exports = {
     getSelectedPemeriksaan,
     getDiagnosa
 };
-

@@ -234,7 +234,25 @@ async function getRequestedExaminations(conn, noorder) {
         ORDER BY tl.urut, tl.id_template
     `;
 
-    const [directResults] = await conn.execute(directQuery, [noorder]);
+    let [directResults] = await conn.execute(directQuery, [noorder]);
+
+    // Some Khanza installations only populate permintaan_pemeriksaan_lab.
+    // In that model, all templates under the requested action are valid.
+    if (directResults.length === 0) {
+        const actionQuery = `
+            SELECT DISTINCT
+                tl.id_template,
+                tl.Pemeriksaan as nama_pemeriksaan,
+                ppl.kd_jenis_prw,
+                tl.kd_jenis_prw as template_kd_jenis_prw
+            FROM permintaan_pemeriksaan_lab ppl
+            INNER JOIN template_laboratorium tl ON ppl.kd_jenis_prw = tl.kd_jenis_prw
+            WHERE ppl.noorder = ?
+            ORDER BY tl.kd_jenis_prw, tl.urut, tl.id_template
+        `;
+
+        [directResults] = await conn.execute(actionQuery, [noorder]);
+    }
 
     // 2. Get all examinations in the same kd_jenis_prw groups
     // This handles cases where group examination is requested but individual components are sent
@@ -288,4 +306,3 @@ module.exports = {
     insertSaranKesanLab,
     getRequestedExaminations
 };
-
