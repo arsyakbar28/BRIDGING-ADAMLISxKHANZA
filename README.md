@@ -394,8 +394,8 @@ Sumber tarif otomatis ditentukan server:
 
 | Kondisi | Mode | Perilaku |
 | --- | --- | --- |
-| `jns_perawatan_lab.total_byr > 0` | `tindakan` | Biaya diambil dari tarif header/tindakan |
-| `jns_perawatan_lab.total_byr = 0` dan `template_laboratorium.biaya_item > 0` | `template` | Biaya dihitung dari total item template |
+| `jns_perawatan_lab.total_byr > 0` | `tindakan` | Tarif disimpan pada header `periksa_lab`; biaya detail disimpan 0 |
+| `jns_perawatan_lab.total_byr = 0` dan `template_laboratorium.biaya_item > 0` | `template` | Tarif disimpan per item pada `detail_periksa_lab`; tarif header disimpan 0 agar billing tidak menghitung ganda |
 | Header dan template sama-sama 0 | `none` | Biaya disimpan 0 |
 
 Client/LIS tidak perlu mengirim parameter tarif. Tarif selalu dihitung dari database Khanza.

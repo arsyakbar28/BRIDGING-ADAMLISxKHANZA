@@ -56,23 +56,10 @@ async function searchPatientRegistration(noorder, limit = 10) {
             // Get selected pemeriksaan (only template_laboratorium that are actually selected/requested)
             const selectedPemeriksaan = await patientRepository.getSelectedPemeriksaan(conn, result.noorder);
 
-            // Format pemeriksaan list (deduplicate by name to avoid duplicates)
-            const allPemeriksaan = [];
-            const pemeriksaanSet = new Set(); // Track unique pemeriksaan by name to avoid duplicates
-            
-            selectedPemeriksaan.forEach(pemeriksaan => {
-                // Normalize nama_pemeriksaan for comparison (trim and lowercase)
-                const namaNormalized = (pemeriksaan.nama_pemeriksaan || "-").trim().toLowerCase();
-                
-                // Only add if nama_pemeriksaan not already exists (deduplicate by name)
-                if (!pemeriksaanSet.has(namaNormalized)) {
-                    pemeriksaanSet.add(namaNormalized);
-                    allPemeriksaan.push({
-                        nama_pemeriksaan: pemeriksaan.nama_pemeriksaan || "-",
-                        kode_pemeriksaan: pemeriksaan.kode_pemeriksaan || "-"
-                    });
-                }
-            });
+            const allPemeriksaan = selectedPemeriksaan.map(pemeriksaan => ({
+                nama_pemeriksaan: pemeriksaan.nama_pemeriksaan || "-",
+                kode_pemeriksaan: pemeriksaan.kode_pemeriksaan || "-"
+            }));
 
             // Get diagnosa
             const diagnosaResults = await patientRepository.getDiagnosa(conn, result.no_rawat);

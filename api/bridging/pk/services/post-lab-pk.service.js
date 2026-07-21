@@ -451,6 +451,18 @@ async function postLabResults(noorder, labData) {
         for (const tindakan of tindakanArray) {
             const tarifData = tarifMap[tindakan.kode_tindakan];
             const resolvedTarif = resolveTindakanTarif(tarifData, tindakan.pemeriksaan);
+            const headerTarif = resolvedTarif.mode === 'template'
+                ? {
+                    biaya_tindakan: 0,
+                    bagian_rs: 0,
+                    bhp: 0,
+                    tarif_perujuk: 0,
+                    tarif_tindakan_dokter: 0,
+                    tarif_tindakan_petugas: 0,
+                    kso: 0,
+                    menejemen: 0
+                }
+                : resolvedTarif;
             totalBiayaPeriksa += resolvedTarif.biaya_tindakan;
 
             // Insert periksa_lab
@@ -461,14 +473,14 @@ async function postLabResults(noorder, labData) {
                 tgl_periksa,
                 jam: jam_periksa,
                 dokter_perujuk,
-                bagian_rs: resolvedTarif.bagian_rs,
-                bhp: resolvedTarif.bhp,
-                tarif_perujuk: resolvedTarif.tarif_perujuk,
-                tarif_tindakan_dokter: resolvedTarif.tarif_tindakan_dokter,
-                tarif_tindakan_petugas: resolvedTarif.tarif_tindakan_petugas,
-                kso: resolvedTarif.kso,
-                menejemen: resolvedTarif.menejemen,
-                biaya: resolvedTarif.biaya_tindakan,
+                bagian_rs: headerTarif.bagian_rs,
+                bhp: headerTarif.bhp,
+                tarif_perujuk: headerTarif.tarif_perujuk,
+                tarif_tindakan_dokter: headerTarif.tarif_tindakan_dokter,
+                tarif_tindakan_petugas: headerTarif.tarif_tindakan_petugas,
+                kso: headerTarif.kso,
+                menejemen: headerTarif.menejemen,
+                biaya: headerTarif.biaya_tindakan,
                 kd_dokter: dokterCode,
                 status: tarifData.status || 'Ralan',
                 kategori: tarifData.kategori || 'PK'
@@ -654,4 +666,3 @@ async function postLabResults(noorder, labData) {
 module.exports = {
     postLabResults
 };
-
